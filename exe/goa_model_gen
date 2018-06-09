@@ -1,3 +1,5 @@
 #!/usr/bin/env ruby
 
-require "goa_model_gen"
+require "goa_model_gen/cli"
+
+GoaModelGen::Cli.start(ARGV)
