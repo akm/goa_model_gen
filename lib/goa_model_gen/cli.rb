@@ -12,8 +12,9 @@ module GoaModelGen
 
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
+      model_def_loader = GoaModelGen::ModelDefLoader.new
       paths.each do |path|
-        types = GoaModelGen::Loader.load(path)
+        types = model_def_loader.load(path)
         puts "types in #{path}"
         puts YAML.dump(types)
       end
@@ -24,8 +25,9 @@ module GoaModelGen
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def model(*paths)
       generator = GoaModelGen::Generator.new(File.expand_path('../templates/model.go.erb', __FILE__))
+      model_def_loader = GoaModelGen::ModelDefLoader.new
       paths.each do |path|
-        types = GoaModelGen::Loader.load(path)
+        types = model_def_loader.load(path)
         dest = File.join(options[:dir], File.basename(path, ".*") + ".go")
         generator.run(types, dest)
         if options[:gofmt]
