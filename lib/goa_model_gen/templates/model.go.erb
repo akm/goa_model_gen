@@ -26,7 +26,7 @@ type <%= type.name %> struct {
 <%- end -%>
 
 
-<%- types.select(&:model?).each do |model| -%>
+<%- types.select(&:store?).each do |model| -%>
 <%- store_name = "#{model.name}Store" -%>
 type <%= store_name %> struct{
 <%- if model.goon && model.goon['ancestor'] -%>

@@ -22,7 +22,7 @@ module GoaModelGen
       end
     end
 
-    def model?
+    def store?
       !!goon
     end
   end
