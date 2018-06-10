@@ -45,4 +45,23 @@ module GoaModelGen
       super(name, fd)
     end
   end
+
+  class SwaggerLoader < BaseLoader
+    def initialize(path)
+      super(SwaggerDef, 'definitions', 'properties')
+    end
+
+    def build_type(name, d)
+      r = super(name, d)
+      required_fields = d['required']
+      r.fields.each do |f|
+        f.required = required_fields.include?(f.name)
+      end
+    end
+
+    def load(name)
+      d = raw[types_key][name]
+      build_type(name, d)
+    end
+  end
 end

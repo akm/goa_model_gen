@@ -12,12 +12,13 @@ module GoaModelGen
 
   class Model < Type
     attr_reader :payload, :media_type
+    attr_reader :payload_name, :media_type_name
     attr_reader :goon
 
     def initialize(name, attrs)
       super(name, attrs)
-      @payload = attrs['payload'] || "#{@name}Payload"
-      @media_type = attrs['media_type'] || @name
+      @payload_name = attrs['payload'] || "#{@name}Payload"
+      @media_type_name = attrs['media_type'] || @name
       @goon = attrs['goon']
     end
 
@@ -32,5 +33,13 @@ module GoaModelGen
     def store?
       !!goon
     end
+
+    def assign_swagger_types(loader)
+      @payload = loader.load(payload_name)
+      @media_type = loader.load(media_type_name)
+    end
+  end
+
+  class SwaggerDef < Type
   end
 end

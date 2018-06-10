@@ -1,0 +1,53 @@
+package controller
+
+import (
+	"github.com/groovenauts/blocks-concurrent-batch-server/app"
+	"github.com/groovenauts/blocks-concurrent-batch-server/model"
+)
+
+<%- types.each do |type| -%>
+func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%= type.name %> {
+	if src == nil {
+		return model.<%= type.name %>{}
+	}
+  return model.<%= type.name %>{
+<%-
+  type.payload.fields.each do |pf|
+  f = type.fields.detect{|f| f.name == pf.name.camelize }
+-%>
+<%- if f.nil? -%>
+  // No model field for <%= pf.name.camelize %> ( <%= pf.name %> )
+<%- elsif f.custom? -%>
+  <%= f.name %> <%= f.type %>PayloadToModel(src.<%= f.name %>),
+<%- elsif pf.optional? -%>
+  <%= f.name %> <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
+<%- else -%>
+  <%= f.name %> src.<%= f.name %>,
+<%- end -%>
+
+<%- end -%>
+  }
+}
+
+func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type.media_type_name %> {
+	if src == nil {
+		return nil
+	}
+  return &app.<%= type.media_type_name %>{
+<%-
+  type.media_type.fields.each do |mf|
+  f = type.fields.detect{|f| f.name == mf.name.camelize }
+-%>
+<%- if f.nil? -%>
+  // No model field for <%= mf.name.camelize %> ( <%= mf.name %> )
+<%- elsif f.custom? -%>
+  <%= f.name %> <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
+<%- else -%>
+  <%= f.name %> src.<%= f.name %>,
+<%- end -%>
+
+<%- end -%>
+  }
+}
+
+<%- end -%>
