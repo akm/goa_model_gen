@@ -21,12 +21,16 @@ module GoaModelGen
 
     desc "model FILE1...", "Generate model files from definition files"
     option :dir, type: :string, default: './model', desc: 'Output directory path'
+    option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def model(*paths)
       generator = GoaModelGen::Generator.new(File.expand_path('../templates/model.go.erb', __FILE__))
       paths.each do |path|
         types = GoaModelGen::Loader.load(path)
         dest = File.join(options[:dir], File.basename(path, ".*") + ".go")
         generator.run(types, dest)
+        if options[:gofmt]
+          system("gofmt -w #{dest}")
+        end
       end
     end
 
