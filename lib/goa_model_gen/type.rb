@@ -13,5 +13,17 @@ module GoaModelGen
       @media_type = attrs['media_type'] || @name
       @goon = attrs['goon']
     end
+
+    def id_type
+      if goon && goon['id'] == 'UUID'
+        return 'string'
+      else
+        goon && goon['id']
+      end
+    end
+
+    def model?
+      !!goon
+    end
   end
 end

@@ -1,0 +1,108 @@
+package model
+
+import (
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
+
+	"github.com/goadesign/goa/uuid"
+
+	"github.com/mjibson/goon"
+)
+
+<%- types.each do |type| -%>
+type <%= type.name %> struct {
+<%- if type.goon -%>
+	Id <%= type.id_type %> `datastore:"-" goon:"id"`
+<%- if type.goon && type.goon['ancestor'] -%>
+	Parent *datastore.Key `datastore:"-" goon:"parent"`
+<%- end -%>
+<%- end -%>
+<%- type.fields.each do |field| -%>
+	<%= field.name %> <%= field.type %>
+<%- end -%>
+}
+
+<%- end -%>
+
+
+<%- types.select(&:model?).each do |model| -%>
+<%- store_name = "#{model.name}Store" -%>
+type <%= store_name %> struct{
+<%- if model.goon && model.goon['ancestor'] -%>
+	ParentKey *datastore.Key
+<%- end -%>
+}
+
+func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, error) {
+	g := goon.FromContext(ctx)
+	r := []*<%= model.name %>{}
+	k := g.Kind(new(<%= model.name %>))
+	log.Infof(ctx, "Kind is %v\n", k)
+	q := datastore.NewQuery(k)
+<%- if model.goon && model.goon['ancestor'] -%>
+	q = q.Ancestor(s.ParentKey)
+<%- end -%>
+	log.Infof(ctx, "q is %v\n", q)
+	_, err := g.GetAll(q.EventualConsistency(), &r)
+	if err != nil {
+		log.Errorf(ctx, "Failed to GetAll <%= model.name %> because of %v\n", err)
+		return nil, err
+	}
+	return r, nil
+}
+
+func (s *<%= store_name %>) Get(ctx context.Context, id string) (*<%= model.name %>, error) {
+	g := goon.FromContext(ctx)
+	r := <%= model.name %>{Id: id}
+	err := g.Get(&r)
+	if err != nil {
+		log.Errorf(ctx, "Failed to Get <%= model.name %> because of %v\n", err)
+		return nil, err
+	}
+<%- if model.goon && model.goon['ancestor'] -%>
+	if err := s.ValidateParent(r); err != nil {
+		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
+		return nil, err
+	}
+<%- end -%>
+
+	return &r, nil
+}
+
+func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
+	g := goon.FromContext(ctx)
+	if m.Id == "" {
+		m.Id = uuid.NewV4().String()
+	}
+<%- if model.goon && model.goon['ancestor'] -%>
+	if err := s.ValidateParent(m); err != nil {
+		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
+		return nil, err
+	}
+<%- end -%>
+	key, err := g.Put(m)
+	if err != nil {
+		log.Errorf(ctx, "Failed to Put %v because of %v\n", m, err)
+		return nil, err
+	}
+	return key, nil
+}
+
+<%- if model.goon && model.goon['ancestor'] -%>
+func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
+	if s.ParentKey == nil {
+	  return nil
+	}
+	if m.Parent == nil {
+	  return fmt.Errorf("No Parent given to %v", m)
+	}
+	if !s.ParentKey.Equal(m.Parent) {
+	  return fmt.Errorf("Invalid Parent for %v", m)
+	}
+	return nil
+}
+
+<%- end -%>
+
+<%- end -%>

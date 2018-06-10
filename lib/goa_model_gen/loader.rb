@@ -11,8 +11,8 @@ module GoaModelGen
 
     def load(path)
       raw = YAML.load_file(path)
-      raw['types'].each_with_object({}) do |(name, definition), d|
-        d[name] = build_type(name, definition)
+      raw['types'].map do |name, definition|
+        build_type(name, definition)
       end
     end
 
