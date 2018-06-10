@@ -2,11 +2,13 @@ require "goa_model_gen"
 
 module GoaModelGen
   class Type
+    attr_reader :kind
     attr_reader :name, :fields
     attr_reader :payload, :media_type
     attr_reader :goon
 
-    def initialize(name, attrs)
+    def initialize(kind, name, attrs)
+      @kind = kind
       @name = name
       @fields = []
       @payload = attrs['payload'] || "#{@name}Payload"
