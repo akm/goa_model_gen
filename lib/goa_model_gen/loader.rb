@@ -7,14 +7,15 @@ require "goa_model_gen/field"
 
 module GoaModelGen
   class BaseLoader
+    attr_reader :path, :raw
     attr_reader :kind, :types_key, :fields_key
-    def initialize(kind, types_key, fields_key)
+    def initialize(path, kind, types_key, fields_key)
       @kind = kind
       @types_key, @fields_key = types_key, fields_key
+      @raw = YAML.load_file(path)
     end
 
-    def load(path)
-      raw = YAML.load_file(path)
+    def load_types
       raw[types_key].map do |name, definition|
         build_type(name, definition)
       end
@@ -34,8 +35,8 @@ module GoaModelGen
   end
 
   class ModelLoader < BaseLoader
-    def initialize
-      super(Model, 'types', 'fields')
+    def initialize(path)
+      super(path, Model, 'types', 'fields')
     end
 
     def build_field(name, f)
