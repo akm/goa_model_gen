@@ -17,7 +17,7 @@ module GoaModelGen
     end
 
     def build_type(name, d)
-      Type.new(name, d).tap do |t|
+      Model.new(name, d).tap do |t|
         d['fields'].each do |fname, f|
           t.fields << build_field(fname, f)
         end
