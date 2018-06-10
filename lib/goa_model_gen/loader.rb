@@ -19,10 +19,15 @@ module GoaModelGen
     def build_type(name, d)
       Type.new(name, d).tap do |t|
         d['fields'].each do |fname, f|
-          fd = f.is_a?(Hash) ? f : {'type': f.to_s}
-          t.fields << Field.new(fname, fd)
+          t.fields << build_field(fname, f)
         end
       end
+    end
+
+    def build_field(name, f)
+      fd = f.is_a?(Hash) ? f : {'type' => f.to_s}
+      fd['type'] ||= 'string'
+      Field.new(name, fd)
     end
 
   end
