@@ -41,7 +41,7 @@ module GoaModelGen
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def converter(*paths)
       generator = GoaModelGen::Generator.new(File.expand_path('../templates/converter.go.erb', __FILE__))
-      swagger_loader = GoaModelGen::PayloadLoader.new(options[:swagger_yaml])
+      swagger_loader = GoaModelGen::SwaggerLoader.new(options[:swagger_yaml])
       paths.each do |path|
         types = GoaModelGen::ModelLoader.new(path).load_types
         types.each{|t| t.assign_swagger_types(swagger_loader) }

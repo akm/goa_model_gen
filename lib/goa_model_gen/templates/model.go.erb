@@ -1,7 +1,10 @@
 package model
 
 import (
-	"golang.org/x/net/context"
+  "fmt"
+  "time"
+
+  "golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
@@ -61,7 +64,7 @@ func (s *<%= store_name %>) Get(ctx context.Context, id string) (*<%= model.name
 		return nil, err
 	}
 <%- if model.goon && model.goon['ancestor'] -%>
-	if err := s.ValidateParent(r); err != nil {
+	if err := s.ValidateParent(&r); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
 		return nil, err
 	}

@@ -48,19 +48,21 @@ module GoaModelGen
 
   class SwaggerLoader < BaseLoader
     def initialize(path)
-      super(SwaggerDef, 'definitions', 'properties')
+      super(path, SwaggerDef, 'definitions', 'properties')
     end
 
     def build_type(name, d)
-      r = super(name, d)
-      required_fields = d['required']
-      r.fields.each do |f|
-        f.required = required_fields.include?(f.name)
+      super(name, d).tap do |r|
+        required_fields = d['required']
+        r.fields.each do |f|
+          f.required = required_fields.include?(f.name)
+        end
       end
     end
 
     def load(name)
       d = raw[types_key][name]
+      raise "#{name} not found in #{path}" unless d
       build_type(name, d)
     end
   end

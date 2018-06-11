@@ -2,6 +2,9 @@ require "goa_model_gen"
 
 require "erb"
 
+## Used in templates
+require "active_support/core_ext/string"
+
 module GoaModelGen
   class Generator
     def initialize(template_path)

@@ -8,6 +8,10 @@ module GoaModelGen
       @name = name
       @fields = []
     end
+
+    def field_diffs(names)
+      self.fields.reject{|f| names.include?(f.name) }
+    end
   end
 
   class Model < Type
@@ -17,9 +21,9 @@ module GoaModelGen
 
     def initialize(name, attrs)
       super(name, attrs)
-      @payload_name = attrs['payload'] || "#{@name}Payload"
-      @media_type_name = attrs['media_type'] || @name
       @goon = attrs['goon']
+      @payload_name = attrs['payload'] || (store? ? "#{@name}Payload" : @name)
+      @media_type_name = attrs['media_type'] || @name
     end
 
     def id_type
@@ -37,6 +41,8 @@ module GoaModelGen
     def assign_swagger_types(loader)
       @payload = loader.load(payload_name)
       @media_type = loader.load(media_type_name)
+    def media_type_name_for_go
+      media_type_name.gsub('-', '')
     end
   end
 

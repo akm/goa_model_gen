@@ -1,6 +1,8 @@
 package controller
 
 import (
+  "time"
+
 	"github.com/groovenauts/blocks-concurrent-batch-server/app"
 	"github.com/groovenauts/blocks-concurrent-batch-server/model"
 )
@@ -12,40 +14,49 @@ func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%=
 	}
   return model.<%= type.name %>{
 <%-
-  type.payload.fields.each do |pf|
-  f = type.fields.detect{|f| f.name == pf.name.camelize }
--%>
-<%- if f.nil? -%>
-  // No model field for <%= pf.name.camelize %> ( <%= pf.name %> )
-<%- elsif f.custom? -%>
-  <%= f.name %> <%= f.type %>PayloadToModel(src.<%= f.name %>),
-<%- elsif pf.optional? -%>
-  <%= f.name %> <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
-<%- else -%>
-  <%= f.name %> src.<%= f.name %>,
-<%- end -%>
+  comments = []
 
+  type.fields.each do |f|
+  pf = type.payload.fields.detect{|pf| f.name.underscore == pf.name }
+-%>
+<%- if pf.nil?
+     comments << "#{f.name} no payload field"
+  elsif f.custom? -%>
+    <%= f.name %>: <%= f.type %>PayloadToModel(src.<%= f.name %>),
+<%- elsif pf.optional? -%>
+    <%= f.name %>: <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
+<%- else -%>
+    <%= f.name %>: src.<%= f.name %>,
+<%- end -%>
+<%- end -%>
+<%- comments.each do |comment| -%>
+    // <%= comment %>
+<%- end -%>
+<%- type.payload.field_diffs(type.fields.map{|f| f.name.underscore}).each do |pf| -%>
+    // No model field for payload field "<%= pf.name %>"
 <%- end -%>
   }
 }
 
-func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type.media_type_name %> {
+func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type.media_type_name_for_go %> {
 	if src == nil {
 		return nil
 	}
-  return &app.<%= type.media_type_name %>{
+  return &app.<%= type.media_type_name_for_go %>{
 <%-
-  type.media_type.fields.each do |mf|
-  f = type.fields.detect{|f| f.name == mf.name.camelize }
+  type.fields.each do |f|
+  pf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
 -%>
 <%- if f.nil? -%>
-  // No model field for <%= mf.name.camelize %> ( <%= mf.name %> )
+    // No model field for <%= mf.name.camelize %> ( <%= mf.name %> )
 <%- elsif f.custom? -%>
-  <%= f.name %> <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
+    <%= f.name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
 <%- else -%>
-  <%= f.name %> src.<%= f.name %>,
+    <%= f.name %>: src.<%= f.name %>,
 <%- end -%>
-
+<%- end -%>
+<%- type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
+    // No field for media type field "<%= mf.name %>"
 <%- end -%>
   }
 }
