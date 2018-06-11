@@ -39,8 +39,19 @@ module GoaModelGen
     end
 
     def assign_swagger_types(loader)
-      @payload = loader.load(payload_name)
-      @media_type = loader.load(media_type_name)
+      # Original Type: VmDisk
+      # Swagger type : VmDisk
+      # Goa struct   : VMDisk
+      # Goa struct name is a little different from others.
+      # Use underscore and camelize to regularize it.
+      @payload = loader.load(to_swagger_name(payload_name))
+      @media_type = loader.load(to_swagger_name(media_type_name))
+    end
+
+    def to_swagger_name(name)
+      name.split('-').map{|n| n.underscore.camelize }.join('-')
+    end
+
     def media_type_name_for_go
       media_type_name.gsub('-', '')
     end
