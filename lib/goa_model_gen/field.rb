@@ -26,5 +26,12 @@ module GoaModelGen
     def optional?
       !required
     end
+
+    def not_null?
+      required || !default.nil?
+    end
+    def nullable?
+      !not_null?
+    end
   end
 end

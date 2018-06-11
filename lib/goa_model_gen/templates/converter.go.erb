@@ -1,8 +1,6 @@
 package controller
 
 import (
-  "time"
-
 	"github.com/groovenauts/blocks-concurrent-batch-server/app"
 	"github.com/groovenauts/blocks-concurrent-batch-server/model"
 )
@@ -23,7 +21,7 @@ func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%=
      comments << "#{f.name} no payload field"
   elsif f.custom? -%>
     <%= f.name %>: <%= f.type %>PayloadToModel(src.<%= f.name %>),
-<%- elsif pf.optional? -%>
+<%- elsif pf.nullable? -%>
     <%= f.name %>: <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
 <%- else -%>
     <%= f.name %>: src.<%= f.name %>,
@@ -44,16 +42,23 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
 	}
   return &app.<%= type.media_type_name_for_go %>{
 <%-
+  comments = []
+
   type.fields.each do |f|
-  pf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
+  mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
 -%>
-<%- if f.nil? -%>
-    // No model field for <%= mf.name.camelize %> ( <%= mf.name %> )
-<%- elsif f.custom? -%>
+<%- if mf.nil?
+     comments << "#{f.name} no media type field"
+  elsif f.custom? -%>
     <%= f.name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
+<%- elsif mf.nullable? -%>
+    <%= f.name %>: &src.<%= f.name %>,
 <%- else -%>
     <%= f.name %>: src.<%= f.name %>,
 <%- end -%>
+<%- end -%>
+<%- comments.each do |comment| -%>
+    // <%= comment %>
 <%- end -%>
 <%- type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
     // No field for media type field "<%= mf.name %>"
