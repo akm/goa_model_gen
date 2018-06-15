@@ -15,12 +15,15 @@ module GoaModelGen
   end
 
   class Model < Type
+    attr_reader :enum_items, :enum_path
     attr_reader :payload, :media_type
     attr_reader :payload_name, :media_type_name
     attr_reader :goon
 
     def initialize(name, attrs)
       super(name, attrs)
+      @base = attrs['base']
+      @enum_path = attrs['enum']
       @goon = attrs['goon']
       @payload_name = attrs['payload'] || (store? ? "#{@name}Payload" : @name)
       @media_type_name = attrs['media_type'] || @name
@@ -39,13 +42,18 @@ module GoaModelGen
     end
 
     def assign_swagger_types(loader)
+      $stderr.puts "assign_swagger_types for #{name.inspect} enum_path: #{enum_path.inspect}"
       # Original Type: VmDisk
       # Swagger type : VmDisk
       # Goa struct   : VMDisk
       # Goa struct name is a little different from others.
       # Use underscore and camelize to regularize it.
-      @payload = loader.load(to_swagger_name(payload_name))
-      @media_type = loader.load(to_swagger_name(media_type_name))
+      if !fields.empty?
+        @payload = loader.load(to_swagger_name(payload_name))
+        @media_type = loader.load(to_swagger_name(media_type_name))
+      elsif enum_path
+        @enum_items = loader.dig(enum_path)
+      end
     end
 
     def to_swagger_name(name)

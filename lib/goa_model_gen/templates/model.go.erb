@@ -14,6 +14,7 @@ import (
 )
 
 <%- types.each do |type| -%>
+<%- if type.fields -%>
 type <%= type.name %> struct {
 <%- if type.goon -%>
 	Id <%= type.id_type %> `datastore:"-" goon:"id"`
@@ -25,7 +26,17 @@ type <%= type.name %> struct {
 	<%= field.name %> <%= field.type %>
 <%- end -%>
 }
+<%- elsif type.base -%>
+type <%= type.name %> <%= type.base %>
 
+<%- if type.enum_items -%>
+const (
+<%- type.enum_items.each do |item| -%>
+  <%= item.camelize %> <%= type.name %> = <%= item.inspect %>
+<%- end -%>
+)
+<%- end -%>
+<%- end -%>
 <%- end -%>
 
 

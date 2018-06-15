@@ -23,14 +23,29 @@ module GoaModelGen
 
     def build_type(name, d)
       kind.new(name, d).tap do |t|
-        d[fields_key].each do |fname, f|
-          t.fields << build_field(fname, f)
+        if d[fields_key]
+          d[fields_key].each do |fname, f|
+            t.fields << build_field(fname, f)
+          end
         end
       end
     end
 
     def build_field(name, f)
       Field.new(name, f)
+    end
+
+    def dig(path)
+      dig_into(raw, path.split('/'), [])
+    end
+
+    def dig_into(hash, keys, footprints)
+      puts "dig_into(hash, #{keys.inspect}, #{footprints.inspect})"
+      key = keys.shift
+      value = hash[key]
+      return value if keys.empty?
+      raise "No data for #{key} in #{footprint.join('/')}" if value.nil?
+      return dig_into(value, keys, footprints + [key])
     end
   end
 
