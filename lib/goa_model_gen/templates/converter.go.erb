@@ -5,7 +5,7 @@ import (
 	"github.com/groovenauts/blocks-concurrent-batch-server/model"
 )
 
-<%- types.each do |type| -%>
+<%- types.select{|t| !t.fields.empty? }.each do |type| -%>
 func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%= type.name %> {
 	if src == nil {
 		return model.<%= type.name %>{}
