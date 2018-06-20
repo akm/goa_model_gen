@@ -48,9 +48,13 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
         mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
         if mf.nil?
           comments << "#{f.name} no media type field"
-        elsif f.custom? -%>
+        elsif f.custom?
+          if f.type_obj && f.type_obj.base -%>
+    <%= f.name %>: <%= f.type_obj.base %>(src.<%= f.name %>),
+<%-       else -%>
     <%= f.name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
-<%-     elsif mf.nullable? -%>
+<%-       end
+        elsif mf.nullable? -%>
     <%= f.name %>: &src.<%= f.name %>,
 <%-     else -%>
     <%= f.name %>: src.<%= f.name %>,
