@@ -12,20 +12,20 @@ func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%=
 	}
   return model.<%= type.name %>{
 <%-
-  comments = []
+      comments = []
 
-  type.fields.each do |f|
-  pf = type.payload.fields.detect{|pf| f.name.underscore == pf.name }
+      type.fields.each do |f|
+      pf = type.payload.fields.detect{|pf| f.name.underscore == pf.name }
+      if pf.nil?
+        comments << "#{f.name} no payload field"
+      elsif f.custom?
 -%>
-<%- if pf.nil?
-     comments << "#{f.name} no payload field"
-  elsif f.custom? -%>
     <%= f.name %>: <%= f.type %>PayloadToModel(src.<%= f.name %>),
-<%- elsif pf.nullable? -%>
+<%-   elsif pf.nullable? -%>
     <%= f.name %>: <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
-<%- else -%>
+<%-   else -%>
     <%= f.name %>: src.<%= f.name %>,
-<%- end -%>
+<%-   end -%>
 <%- end -%>
 <%- comments.each do |comment| -%>
     // <%= comment %>
@@ -42,27 +42,26 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
 	}
   return &app.<%= type.media_type_name_for_go %>{
 <%-
-  comments = []
+      comments = []
 
-  type.fields.each do |f|
-  mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
--%>
-<%- if mf.nil?
-     comments << "#{f.name} no media type field"
-  elsif f.custom? -%>
+      type.fields.each do |f|
+        mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
+        if mf.nil?
+          comments << "#{f.name} no media type field"
+        elsif f.custom? -%>
     <%= f.name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
-<%- elsif mf.nullable? -%>
+<%-     elsif mf.nullable? -%>
     <%= f.name %>: &src.<%= f.name %>,
-<%- else -%>
+<%-     else -%>
     <%= f.name %>: src.<%= f.name %>,
-<%- end -%>
-<%- end -%>
-<%- comments.each do |comment| -%>
+<%-     end -%>
+<%-   end -%>
+<%-   comments.each do |comment| -%>
     // <%= comment %>
-<%- end -%>
-<%- type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
+<%-   end -%>
+<%-   type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
     // No field for media type field "<%= mf.name %>"
-<%- end -%>
+<%-   end -%>
   }
 }
 
