@@ -4,6 +4,7 @@ module GoaModelGen
   class Field
     attr_reader :name, :type, :default
     attr_accessor :required
+    attr_reader :type_obj
 
     def initialize(name, attrs)
       @name = name
@@ -32,6 +33,10 @@ module GoaModelGen
     end
     def nullable?
       !not_null?
+    end
+
+    def assign_type_base(types)
+      @type_obj = types[self.type]
     end
   end
 end

@@ -12,6 +12,10 @@ module GoaModelGen
     def field_diffs(names)
       self.fields.reject{|f| names.include?(f.name) }
     end
+
+    def assign_field_type_base(types)
+      self.fields.each{|f| f.assign_type_base(types) }
+    end
   end
 
   class Model < Type
