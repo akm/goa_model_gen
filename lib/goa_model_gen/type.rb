@@ -19,6 +19,7 @@ module GoaModelGen
     attr_reader :payload, :media_type
     attr_reader :payload_name, :media_type_name
     attr_reader :goon
+    attr_reader :base
 
     def initialize(name, attrs)
       super(name, attrs)
