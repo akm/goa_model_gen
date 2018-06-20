@@ -14,29 +14,30 @@ import (
 )
 
 <%- types.each do |type| -%>
-<%- if !type.fields.empty? -%>
+<%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
-<%- if type.goon -%>
+<%-     if type.goon -%>
 	Id <%= type.id_type %> `datastore:"-" goon:"id"`
-<%- if type.goon && type.goon['ancestor'] -%>
+<%-       if type.goon && type.goon['ancestor'] -%>
 	Parent *datastore.Key `datastore:"-" goon:"parent"`
-<%- end -%>
-<%- end -%>
-<%- type.fields.each do |field| -%>
+<%-       end -%>
+<%-     end -%>
+<%-     type.fields.each do |field| -%>
 	<%= field.name %> <%= field.type %>
-<%- end -%>
+<%-     end -%>
 }
-<%- elsif type.base -%>
+<%-   elsif type.base -%>
 type <%= type.name %> <%= type.base %>
 
-<%- if type.enum_items -%>
+<%-     if type.enum_items -%>
 const (
-<%- type.enum_items.each do |item| -%>
+<%-       type.enum_items.each do |item| -%>
   <%= item.camelize %> <%= type.name %> = <%= item.inspect %>
-<%- end -%>
+<%-       end -%>
 )
-<%- end -%>
-<%- end -%>
+<%-     end -%>
+<%-   end -%>
+
 <%- end -%>
 
 
