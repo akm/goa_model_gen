@@ -14,7 +14,7 @@ import (
 )
 
 <%- types.each do |type| -%>
-<%- if type.fields -%>
+<%- if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%- if type.goon -%>
 	Id <%= type.id_type %> `datastore:"-" goon:"id"`
