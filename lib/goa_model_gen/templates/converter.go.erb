@@ -53,14 +53,14 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
           comments << "#{f.name} no media type field"
         elsif f.custom?
           if f.type_obj && f.type_obj.base -%>
-    <%= f.name %>: <%= f.type_obj.base %>(src.<%= f.name %>),
+    <%= mf.goa_name %>: <%= f.type_obj.base %>(src.<%= f.name %>),
 <%-       else -%>
-    <%= f.name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
+    <%= mf.goa_name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
 <%-       end
         elsif mf.nullable? -%>
-    <%= f.name %>: &src.<%= f.name %>,
+    <%= mf.goa_name %>: &src.<%= f.name %>,
 <%-     else -%>
-    <%= f.name %>: src.<%= f.name %>,
+    <%= mf.goa_name %>: src.<%= f.name %>,
 <%-     end -%>
 <%-   end -%>
 <%-   comments.each do |comment| -%>
