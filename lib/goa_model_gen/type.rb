@@ -30,8 +30,13 @@ module GoaModelGen
       @base = attrs['base']
       @enum_path = attrs['enum']
       @goon = attrs['goon']
-      @payload_name = attrs['payload'] || (store? ? "#{@name}Payload" : @name)
-      @media_type_name = attrs['media_type'] || @name
+      @payload_name = check_blank(attrs['payload']){ store? ? "#{@name}Payload" : @name }
+      @media_type_name = check_blank(attrs['media_type']){ @name }
+    end
+
+    def check_blank(s)
+      s.nil? ? (block_given? ? yield : nil) :
+        (s.empty? || s == '-') ? nil : s
     end
 
     def id_type
@@ -54,8 +59,8 @@ module GoaModelGen
       # Goa struct name is a little different from others.
       # Use underscore and camelize to regularize it.
       if !fields.empty?
-        @payload = loader.load(to_swagger_name(payload_name))
-        @media_type = loader.load(to_swagger_name(media_type_name))
+        @payload = loader.load(to_swagger_name(payload_name)) if payload_name
+        @media_type = loader.load(to_swagger_name(media_type_name)) if media_type_name
       elsif enum_path
         @enum_items = loader.dig(enum_path)
       end
