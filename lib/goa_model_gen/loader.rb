@@ -45,7 +45,7 @@ module GoaModelGen
       key = keys.shift
       value = hash[key]
       return value if keys.empty?
-      raise "No data for #{key} in #{footprint.join('/')}" if value.nil?
+      raise "No data for #{key} in #{footprints.join('/')}" if value.nil?
       return dig_into(value, keys, footprints + [key])
     end
   end
