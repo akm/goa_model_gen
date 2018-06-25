@@ -10,6 +10,7 @@ module GoaModelGen
     attr_reader :path, :raw
     attr_reader :kind, :types_key, :fields_key
     def initialize(path, kind, types_key, fields_key)
+      @path = path
       @kind = kind
       @types_key, @fields_key = types_key, fields_key
       @raw = YAML.load_file(path)
