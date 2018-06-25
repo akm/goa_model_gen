@@ -41,7 +41,7 @@ module GoaModelGen
     end
 
     def dig_into(hash, keys, footprints)
-      puts "dig_into(hash, #{keys.inspect}, #{footprints.inspect})"
+      # puts "dig_into(hash, #{keys.inspect}, #{footprints.inspect})"
       key = keys.shift
       value = hash[key]
       return value if keys.empty?
@@ -76,10 +76,23 @@ module GoaModelGen
       end
     end
 
+    def lookup(name)
+      raw[types_key][name]
+    end
+
     def load(name)
-      d = raw[types_key][name]
-      raise "#{name} not found in #{path}" unless d
+      d = lookup(name)
+      unless d
+        $stderr.puts("WARNING #{name} not found in #{path}")
+        return nil
+      end
       build_type(name, d)
+    end
+
+    def load!(name)
+      r = load(name)
+      raise "#{name} not found in #{path}" unless r
+      r
     end
   end
 end

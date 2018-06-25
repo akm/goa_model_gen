@@ -52,7 +52,7 @@ module GoaModelGen
     end
 
     def assign_swagger_types(loader)
-      $stderr.puts "assign_swagger_types for #{name.inspect} enum_path: #{enum_path.inspect}"
+      $stderr.puts "assign_swagger_types for #{name.inspect}"
       # Original Type: VmDisk
       # Swagger type : VmDisk
       # Goa struct   : VMDisk
@@ -60,7 +60,7 @@ module GoaModelGen
       # Use underscore and camelize to regularize it.
       if !fields.empty?
         @payload = loader.load(to_swagger_name(payload_name)) if payload_name
-        @media_type = loader.load(to_swagger_name(media_type_name)) if media_type_name
+        @media_type = loader.load(media_type_name) if media_type_name
       elsif enum_path
         @enum_items = loader.dig(enum_path)
       end
