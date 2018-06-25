@@ -1,4 +1,5 @@
 require 'goa_model_gen'
+require 'goa_model_gen/goa'
 
 module GoaModelGen
   class Field
@@ -16,12 +17,8 @@ module GoaModelGen
     # https://goa.design/design/overview/
     PRIMITIVE_TYPES = %q[bool int float string time.Time uuid.UUID interface{}]
 
-    GOA_SPECIAL_NAMES = {
-      "id" => "ID",
-    }
-
     def goa_name
-      name.split("_").map{|s| GOA_SPECIAL_NAMES[s] || s.capitalize}.join
+      Goa.capitalize_join(name.split("_"))
     end
 
     def primitive?
