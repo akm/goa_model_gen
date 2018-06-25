@@ -71,7 +71,7 @@ module GoaModelGen
     end
 
     def media_type_name_for_go
-      media_type_name.gsub('-', '')
+      Goa.capitalize_join(media_type_name.split('-').map(&:underscore).map{|n| n.split('_')}.flatten)
     end
   end
 
