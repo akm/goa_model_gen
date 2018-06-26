@@ -40,6 +40,29 @@ const (
 
 <%- end -%>
 
+<%- types.select(&:store?).each do |model| -%>
+func (m *<%= model.name %>) PrepareToCreate() error {
+<%- if model.fields.any?{|f| f.name == "CreatedAt"} -%>
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = time.Now()
+	}
+<%- end -%>
+<%- if model.fields.any?{|f| f.name == "UpdatedAt"} -%>
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = time.Now()
+	}
+<%- end -%>
+	return nil
+}
+
+func (m *<%= model.name %>) PrepareToUpdate() error {
+<%- if model.fields.any?{|f| f.name == "UpdatedAt"} -%>
+	m.UpdatedAt = time.Now()
+<%- end -%>
+	return nil
+}
+
+<%- end -%>
 
 <%- types.select(&:store?).each do |model| -%>
 <%- store_name = "#{model.name}Store" -%>
@@ -83,6 +106,30 @@ func (s *<%= store_name %>) Get(ctx context.Context, id string) (*<%= model.name
 <%- end -%>
 
 	return &r, nil
+}
+
+func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
+  err := m.PrepareToCreate()
+  if err != nil {
+    return nil, err
+  }
+	return s.ValidateAndPut(ctx, m)
+}
+
+func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
+  err := m.PrepareToUpdate()
+  if err != nil {
+    return nil, err
+  }
+	return s.ValidateAndPut(ctx, m)
+}
+
+func (s *<%= store_name %>) ValidateAndPut(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
+	err := m.Validate()
+	if err != nil {
+		return nil, err
+	}
+	return s.Put(ctx, m)
 }
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
