@@ -17,13 +17,13 @@ import (
 <%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
-	Id <%= type.id_type %> `datastore:"-" goon:"id"`
+	Id <%= type.id_type %> `datastore:"-" goon:"id" json:"id"`
 <%-       if type.goon && type.goon['ancestor'] -%>
-	Parent *datastore.Key `datastore:"-" goon:"parent"`
+	Parent *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
 <%-     end -%>
 <%-     type.fields.each do |field| -%>
-	<%= field.name %> <%= field.type %>
+	<%= field.name %> <%= field.type %> `json:"<%= field.name.underscore %><%= field.nullable? ? ',omitempty' : '' %>" <%= field.nullable? ? '' : 'validate:"required"' %>`
 <%-     end -%>
 }
 <%-   elsif type.base -%>
