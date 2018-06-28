@@ -165,6 +165,21 @@ func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 	return nil
 }
 
+func (s *<%= store_name %>) Delete(ctx context.Context, m *<%= model.name %>) error {
+	g := goon.FromContext(ctx)
+	key, err := g.KeyError(m)
+	if err != nil {
+		log.Errorf(ctx, "Failed to Get %v because of %v\n", m, err)
+		return err
+	}
+	err = g.Delete(key)
+	if err != nil {
+		log.Errorf(ctx, "Failed to Delete %v because of %v\n", m, err)
+		return err
+	}
+	return nil
+}
+
 <%- end -%>
 
 <%- end -%>
