@@ -8,12 +8,14 @@ module GoaModelGen
     attr_reader :name, :type, :default
     attr_accessor :required
     attr_reader :type_obj
+    attr_reader :datastore_tag
 
     def initialize(name, attrs)
       @name = name
       @type = attrs['type']
       @required = attrs['required']
       @default = attrs['default']
+      @datastore_tag = attrs['datastore_tag']
     end
 
     # https://goa.design/design/overview/
@@ -53,6 +55,7 @@ module GoaModelGen
       [
         ['json', json_tag],
         ['validate', validate_tag],
+        ['datastore', datastore_tag],
       ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
     end
   end

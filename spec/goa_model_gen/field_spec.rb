@@ -12,5 +12,10 @@ RSpec.describe GoaModelGen::Field do
       expect(f.tag).to eq 'json:"test_field" validate:"required"'
     end
 
+    it :datastore_tag do
+      f = GoaModelGen::Field.new("TestField", 'datastore_tag' => 'noindex')
+      expect(f.tag).to eq 'json:"test_field,omitempty" datastore:"noindex"'
+    end
+
   end
 end
