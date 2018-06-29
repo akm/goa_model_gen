@@ -1,6 +1,8 @@
 require 'goa_model_gen'
 require 'goa_model_gen/goa'
 
+require "active_support/core_ext/string"
+
 module GoaModelGen
   class Field
     attr_reader :name, :type, :default
@@ -42,6 +44,16 @@ module GoaModelGen
 
     def assign_type_base(types)
       @type_obj = types[self.type]
+    end
+
+    def tag
+      json_tag = name.underscore.dup
+      json_tag << ',omitempty' if nullable?
+      validate_tag = 'required' unless nullable?
+      [
+        ['json', json_tag],
+        ['validate', validate_tag],
+      ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
     end
   end
 end

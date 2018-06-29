@@ -23,7 +23,7 @@ type <%= type.name %> struct {
 <%-       end -%>
 <%-     end -%>
 <%-     type.fields.each do |field| -%>
-	<%= field.name %> <%= field.type %> `json:"<%= field.name.underscore %><%= field.nullable? ? ',omitempty' : '' %>" <%= field.nullable? ? '' : 'validate:"required"' %>`
+	<%= field.name %> <%= field.type %> `<%= field.tag %>`
 <%-     end -%>
 }
 <%-   elsif type.base -%>
