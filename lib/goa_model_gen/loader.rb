@@ -71,7 +71,7 @@ module GoaModelGen
       super(name, d).tap do |r|
         required_fields = d['required']
         r.fields.each do |f|
-          f.required = required_fields.include?(f.name)
+          f.required = (required_fields || []).include?(f.name)
         end
       end
     end

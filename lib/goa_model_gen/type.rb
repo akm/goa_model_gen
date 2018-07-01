@@ -24,6 +24,7 @@ module GoaModelGen
     attr_reader :payload_name, :media_type_name
     attr_reader :goon
     attr_reader :base
+    attr_reader :conv
 
     def initialize(name, attrs)
       super(name, attrs)
@@ -32,6 +33,7 @@ module GoaModelGen
       @goon = attrs['goon']
       @payload_name = check_blank(attrs['payload']){ store? ? "#{@name}Payload" : @name }
       @media_type_name = check_blank(attrs['media_type']){ @name }
+      @conv = attrs['conv'] || 'generate'
     end
 
     def check_blank(s)
@@ -73,6 +75,11 @@ module GoaModelGen
     def media_type_name_for_go
       Goa.capitalize_join(media_type_name.split('-').map(&:underscore).map{|n| n.split('_')}.flatten)
     end
+
+    def gen_converter?
+      (conv == 'generate') && !fields.empty?
+    end
+
   end
 
   class SwaggerDef < Type
