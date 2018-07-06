@@ -8,9 +8,13 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
+<%- if types.select(&:store?).any?{|m| m.goon && m.goon['id'] == 'UUID'} -%>
 	"github.com/goadesign/goa/uuid"
+<%- end -%>
 
+<%- if types.any?(&:store?) -%>
 	"github.com/mjibson/goon"
+<%- end -%>
 )
 
 <%- types.each do |type| -%>
@@ -139,9 +143,11 @@ func (s *<%= store_name %>) ValidateAndPut(ctx context.Context, m *<%= model.nam
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
 	g := goon.FromContext(ctx)
+<%- if model.goon && model.goon['id'] == 'UUID' -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
 	}
+<%- end -%>
 <%- if model.goon && model.goon['ancestor'] -%>
 	if err := s.ValidateParent(m); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
