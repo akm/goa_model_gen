@@ -162,7 +162,7 @@ func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 	  return nil
 	}
 	if m.Parent == nil {
-	  return fmt.Errorf("No Parent given to %v", m)
+		m.Parent = s.ParentKey
 	}
 	if !s.ParentKey.Equal(m.Parent) {
 	  return fmt.Errorf("Invalid Parent for %v", m)
