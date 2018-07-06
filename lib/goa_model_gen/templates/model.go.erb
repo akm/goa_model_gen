@@ -93,6 +93,11 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 func (s *<%= store_name %>) Get(ctx context.Context, id string) (*<%= model.name %>, error) {
 	g := goon.FromContext(ctx)
 	r := <%= model.name %>{Id: id}
+<%- if model.goon && model.goon['ancestor'] -%>
+  if s.ParentKey != nil {
+    r.Parent = s.ParentKey
+  }
+<%- end -%>
 	err := g.Get(&r)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get <%= model.name %> because of %v\n", err)
