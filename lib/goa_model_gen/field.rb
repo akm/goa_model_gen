@@ -19,7 +19,7 @@ module GoaModelGen
     end
 
     # https://goa.design/design/overview/
-    PRIMITIVE_TYPES = %q[bool int float string time.Time uuid.UUID interface{}]
+    PRIMITIVE_TYPES = %q[bool int int64 float string time.Time uuid.UUID interface{}]
 
     def goa_name
       Goa.capitalize_join(name.split("_"))
