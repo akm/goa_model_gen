@@ -57,10 +57,8 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
 <%-       else -%>
     <%= mf.goa_name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
 <%-       end
-        elsif mf.nullable? -%>
-    <%= mf.goa_name %>: &src.<%= f.name %>,
-<%-     else -%>
-    <%= mf.goa_name %>: src.<%= f.name %>,
+        else -%>
+    <%= mf.goa_name %>: <%= mf.nullable? ? '&' : '' %>src.<%= f.name %>,
 <%-     end -%>
 <%-   end -%>
 <%-   comments.each do |comment| -%>
