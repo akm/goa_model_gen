@@ -94,7 +94,7 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 	return r, nil
 }
 
-func (s *<%= store_name %>) Get(ctx context.Context, id string) (*<%= model.name %>, error) {
+func (s *<%= store_name %>) Get(ctx context.Context, id <%= model.id_type %>) (*<%= model.name %>, error) {
 	g := goon.FromContext(ctx)
 	r := <%= model.name %>{Id: id}
 <%- if model.goon['ancestor'] -%>
