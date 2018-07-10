@@ -58,7 +58,11 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
     <%= mf.goa_name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
 <%-       end
         else -%>
+<%-       if mf.golang_type == f.type -%>
     <%= mf.goa_name %>: <%= mf.nullable? ? '&' : '' %>src.<%= f.name %>,
+<%-       else -%>
+    <%= mf.goa_name %>: <%= f.type.camelize %>To<%= mf.golang_type.camelize %><%= mf.nullable? ? 'Pointer' : '' %>(src.<%= f.name %>),
+<%-       end -%>
 <%-     end -%>
 <%-   end -%>
 <%-   comments.each do |comment| -%>
