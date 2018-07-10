@@ -22,7 +22,7 @@ import (
 type <%= type.name %> struct {
 <%-     if type.goon -%>
 	<%= type.id_name %> <%= type.id_golang_type %> `datastore:"-" goon:"id" json:"<%= type.id_name.underscore %>"`
-<%-       if type.goon['ancestor'] -%>
+<%-       if type.parent -%>
 	Parent *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
 <%-     end -%>
@@ -71,7 +71,7 @@ func (m *<%= model.name %>) PrepareToUpdate() error {
 <%- types.select(&:store?).each do |model| -%>
 <%- store_name = "#{model.name}Store" -%>
 type <%= store_name %> struct{
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
 	ParentKey *datastore.Key
 <%- end -%>
 }
@@ -82,7 +82,7 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 	k := g.Kind(new(<%= model.name %>))
 	log.Infof(ctx, "Kind is %v\n", k)
 	q := datastore.NewQuery(k)
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
 	q = q.Ancestor(s.ParentKey)
 <%- end -%>
 	log.Infof(ctx, "q is %v\n", q)
@@ -97,7 +97,7 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 func (s *<%= store_name %>) Get(ctx context.Context, id <%= model.id_golang_type %>) (*<%= model.name %>, error) {
 	g := goon.FromContext(ctx)
 	r := <%= model.name %>{Id: id}
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
   if s.ParentKey != nil {
     r.Parent = s.ParentKey
   }
@@ -107,7 +107,7 @@ func (s *<%= store_name %>) Get(ctx context.Context, id <%= model.id_golang_type
 		log.Errorf(ctx, "Failed to Get <%= model.name %> because of %v\n", err)
 		return nil, err
 	}
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
 	if err := s.ValidateParent(&r); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
 		return nil, err
@@ -148,7 +148,7 @@ func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*dat
 		m.Id = uuid.NewV4().String()
 	}
 <%- end -%>
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
 	if err := s.ValidateParent(m); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
 		return nil, err
@@ -162,7 +162,7 @@ func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*dat
 	return key, nil
 }
 
-<%- if model.goon['ancestor'] -%>
+<%- if model.parent -%>
 func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 	if s.ParentKey == nil {
 	  return nil

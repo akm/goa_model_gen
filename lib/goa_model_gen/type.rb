@@ -53,6 +53,10 @@ module GoaModelGen
       goon && (goon['id_name'] || 'Id')
     end
 
+    def parent
+      goon && goon['parent']
+    end
+
     def store?
       !!goon
     end
