@@ -41,7 +41,7 @@ module GoaModelGen
         (s.empty? || s == '-') ? nil : s
     end
 
-    def id_type
+    def id_golang_type
       if goon && goon['id'] == 'UUID'
         return 'string'
       else
