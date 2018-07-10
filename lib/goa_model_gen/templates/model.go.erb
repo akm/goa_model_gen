@@ -21,7 +21,7 @@ import (
 <%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
-	Id <%= type.id_golang_type %> `datastore:"-" goon:"id" json:"id"`
+	<%= type.id_name %> <%= type.id_golang_type %> `datastore:"-" goon:"id" json:"<%= type.id_name.underscore %>"`
 <%-       if type.goon['ancestor'] -%>
 	Parent *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
