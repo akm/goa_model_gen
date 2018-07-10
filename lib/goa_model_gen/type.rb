@@ -42,10 +42,10 @@ module GoaModelGen
     end
 
     def id_golang_type
-      if goon && goon['id'] == 'UUID'
+      if goon && goon['id_type'] == 'UUID'
         return 'string'
       else
-        goon && goon['id']
+        goon && goon['id_type']
       end
     end
 

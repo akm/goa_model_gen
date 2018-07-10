@@ -8,7 +8,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-<%- if types.select(&:store?).any?{|m| m.goon['id'] == 'UUID'} -%>
+<%- if types.select(&:store?).any?{|m| m.goon['id_type'] == 'UUID'} -%>
 	"github.com/goadesign/goa/uuid"
 <%- end -%>
 
@@ -143,7 +143,7 @@ func (s *<%= store_name %>) ValidateAndPut(ctx context.Context, m *<%= model.nam
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
 	g := goon.FromContext(ctx)
-<%- if model.goon['id'] == 'UUID' -%>
+<%- if model.goon['id_type'] == 'UUID' -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
 	}
