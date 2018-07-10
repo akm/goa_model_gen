@@ -72,9 +72,7 @@ module GoaModelGen
       "number" => Hash.new("float32").update(
         "double" => "float64",
       ),
-      "integer" => Hash.new("int").update(
-        "int64" => "int64",
-      ),
+      "integer" => Hash.new("int"),
       "boolean" => Hash.new("bool"),
     }
 
