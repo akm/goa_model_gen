@@ -94,9 +94,9 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 	return r, nil
 }
 
-func (s *<%= store_name %>) Get(ctx context.Context, id <%= model.id_golang_type %>) (*<%= model.name %>, error) {
+func (s *<%= store_name %>) Get(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model.name %>, error) {
 	g := goon.FromContext(ctx)
-	r := <%= model.name %>{Id: id}
+	r := <%= model.name %>{<%= model.id_name %>: <%= model.id_name_var %>}
 <%- if model.parent -%>
   if s.ParentKey != nil {
     r.Parent = s.ParentKey

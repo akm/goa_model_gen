@@ -53,6 +53,11 @@ module GoaModelGen
       goon && (goon['id_name'] || 'Id')
     end
 
+    def id_name_var
+      s = id_name
+      s.blank? ? nil : s[0].downcase + s[1..-1]
+    end
+
     def parent
       goon && goon['parent']
     end
