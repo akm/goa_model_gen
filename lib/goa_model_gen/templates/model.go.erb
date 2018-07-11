@@ -11,10 +11,6 @@ import (
 <%- if types.select(&:store?).any?{|m| m.goon['id_type'] == 'UUID'} -%>
 	"github.com/goadesign/goa/uuid"
 <%- end -%>
-
-<%- if types.any?(&:store?) -%>
-	"github.com/mjibson/goon"
-<%- end -%>
 )
 
 <%- types.each do |type| -%>
@@ -77,7 +73,7 @@ type <%= store_name %> struct{
 }
 
 func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, error) {
-	g := goon.FromContext(ctx)
+	g := GoonFromContext(ctx)
 	r := []*<%= model.name %>{}
 	k := g.Kind(new(<%= model.name %>))
 	log.Infof(ctx, "Kind is %v\n", k)
@@ -95,7 +91,7 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 }
 
 func (s *<%= store_name %>) Get(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model.name %>, error) {
-	g := goon.FromContext(ctx)
+	g := GoonFromContext(ctx)
 	r := <%= model.name %>{<%= model.id_name %>: <%= model.id_name_var %>}
 <%- if model.parent -%>
   if s.ParentKey != nil {
@@ -142,7 +138,7 @@ func (s *<%= store_name %>) ValidateAndPut(ctx context.Context, m *<%= model.nam
 }
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-	g := goon.FromContext(ctx)
+	g := GoonFromContext(ctx)
 <%- if model.goon['id_type'] == 'UUID' -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
@@ -177,7 +173,7 @@ func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 }
 
 func (s *<%= store_name %>) Delete(ctx context.Context, m *<%= model.name %>) error {
-	g := goon.FromContext(ctx)
+	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get %v because of %v\n", m, err)
