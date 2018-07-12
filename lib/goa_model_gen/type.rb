@@ -66,6 +66,14 @@ module GoaModelGen
       !!goon
     end
 
+    def key_id_method
+      case id_golang_type
+      when 'int64' then 'IntID'
+      when 'string' then 'StringID'
+      else 'UnknownTypeID'
+      end
+    end
+
     def assign_swagger_types(loader)
       $stderr.puts "assign_swagger_types for #{name.inspect}"
       # Original Type: VmDisk

@@ -79,7 +79,7 @@ type <%= store_name %> struct{
 <%- end -%>
 }
 
-func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, error) {
+func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model.name %>, error) {
 	g := GoonFromContext(ctx)
 	r := []*<%= model.name %>{}
 	k := g.Kind(new(<%= model.name %>))
@@ -97,27 +97,69 @@ func (s *<%= store_name %>) GetAll(ctx context.Context) ([]*<%= model.name %>, e
 	return r, nil
 }
 
-func (s *<%= store_name %>) Get(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model.name %>, error) {
-	g := GoonFromContext(ctx)
-	r := <%= model.name %>{<%= model.id_name %>: <%= model.id_name_var %>}
+func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model.name %>, error) {
 <%- if model.parent -%>
-  if s.ParentKey != nil {
-    r.Parent = s.ParentKey
-  }
+	r := <%= model.name %>{ParentKey: s.ParentKey, <%= model.id_name %>: <%= model.id_name_var %>}
+<%- else -%>
+	r := <%= model.name %>{<%= model.id_name %>: <%= model.id_name_var %>}
 <%- end -%>
-	err := g.Get(&r)
+  err := s.Get(ctx, &r)
+	if err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (s *<%= store_name %>) ByKey(ctx context.Context, key *datastore.Key) (*<%= model.name %>, error) {
+	if err := s.IsValidKey(key); err != nil {
+		log.Errorf(ctx, "<%= store_name %>.ByKey got Invalid key: %v because of %v\n", key, err)
+		return err
+	}
+
+<%- if model.parent -%>
+	r := <%= model.name %>{ParentKey: key.Parent, <%= model.id_name %>: key.<%= model.key_id_method %>()}
+<%- else -%>
+	r := <%= model.name %>{<%= model.id_name %>: key.<%= model.key_id_method %>()}
+<%- end -%>
+	err := s.Get(ctx, &r)
+	if err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (s *<%= store_name %>) Get(ctx context.Context, m *<%= model.name %>) error {
+	g := GoonFromContext(ctx)
+	err := g.Get(&m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get <%= model.name %> because of %v\n", err)
 		return nil, err
 	}
 <%- if model.parent -%>
-	if err := s.ValidateParent(&r); err != nil {
+	if err := s.ValidateParent(&m); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
 		return nil, err
 	}
 <%- end -%>
 
-	return &r, nil
+	return nil
+}
+
+func (s *<%= store_name %>) IsValidKey(ctx context.Context, key *datastore.Key) error {
+	if key == nil {
+		return fmt.Errorf("key is nil")
+	}
+	g := GoonFromContext(ctx)
+	expected := g.Kind(&<%= model.name %>{})
+	if key.Kind() != expected {
+		return fmt.Errorf("key kind must be %s but was %s", expected, key.Kind())
+	}
+<%- if model.parent -%>
+	if key.Parent() == nil {
+		return fmt.Errorf("key parent must not be nil but was nil")
+	}
+<%- end -%>
+	return nil
 }
 
 func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
