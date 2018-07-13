@@ -63,9 +63,9 @@ func (m *<%= model.name %>) PrepareToUpdate() error {
 }
 
 <%-   if model.parent -%>
-func (m *<%= model.name %>) Parent() (<%= model.parent %>, error) {
+func (m *<%= model.name %>) Parent(ctx context.Context) (*<%= model.parent %>, error) {
   parentStore := &<%= model.parent %>Store{}
-	return parentStore.ByKey(m.Parent)
+	return parentStore.ByKey(ctx, m.ParentKey)
 }
 <%-   end -%>
 
@@ -111,13 +111,13 @@ func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <
 }
 
 func (s *<%= store_name %>) ByKey(ctx context.Context, key *datastore.Key) (*<%= model.name %>, error) {
-	if err := s.IsValidKey(key); err != nil {
+	if err := s.IsValidKey(ctx, key); err != nil {
 		log.Errorf(ctx, "<%= store_name %>.ByKey got Invalid key: %v because of %v\n", key, err)
-		return err
+		return nil, err
 	}
 
 <%- if model.parent -%>
-	r := <%= model.name %>{ParentKey: key.Parent, <%= model.id_name %>: key.<%= model.key_id_method %>()}
+	r := <%= model.name %>{ParentKey: key.Parent(), <%= model.id_name %>: key.<%= model.key_id_method %>()}
 <%- else -%>
 	r := <%= model.name %>{<%= model.id_name %>: key.<%= model.key_id_method %>()}
 <%- end -%>
@@ -130,15 +130,15 @@ func (s *<%= store_name %>) ByKey(ctx context.Context, key *datastore.Key) (*<%=
 
 func (s *<%= store_name %>) Get(ctx context.Context, m *<%= model.name %>) error {
 	g := GoonFromContext(ctx)
-	err := g.Get(&m)
+	err := g.Get(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get <%= model.name %> because of %v\n", err)
-		return nil, err
+		return err
 	}
 <%- if model.parent -%>
-	if err := s.ValidateParent(&m); err != nil {
+	if err := s.ValidateParent(m); err != nil {
 		log.Errorf(ctx, "Invalid parent key for <%= model.name %> because of %v\n", err)
-		return nil, err
+		return err
 	}
 <%- end -%>
 
@@ -212,11 +212,11 @@ func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 	if s.ParentKey == nil {
 	  return nil
 	}
-	if m.Parent == nil {
-		m.Parent = s.ParentKey
+	if m.ParentKey == nil {
+		m.ParentKey = s.ParentKey
 	}
-	if !s.ParentKey.Equal(m.Parent) {
-	  return fmt.Errorf("Invalid Parent for %v", m)
+	if !s.ParentKey.Equal(m.ParentKey) {
+	  return fmt.Errorf("Invalid ParentKey for %v", m)
 	}
 	return nil
 }
