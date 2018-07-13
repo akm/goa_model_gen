@@ -41,9 +41,11 @@ module GoaModelGen
       generator = GoaModelGen::Generator.new(File.expand_path('../templates/converter.go.erb', __FILE__))
       load_types_for(paths, options[:swagger_yaml]) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + "_conv.go")
-        generator.run(types, dest)
-        if options[:gofmt]
-          system("gofmt -w #{dest}")
+        if types.any?{|t| !!t.payload || !!t.media_type}
+          generator.run(types, dest)
+          if options[:gofmt]
+            system("gofmt -w #{dest}")
+          end
         end
       end
     end
