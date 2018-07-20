@@ -162,12 +162,45 @@ func (s *<%= store_name %>) IsValidKey(ctx context.Context, key *datastore.Key) 
 	return nil
 }
 
+func (s *<%= store_name %>) Exist(ctx context.Context, m *<%= model.name %>) (bool, error) {
+	g := GoonFromContext(ctx)
+	key, err := g.KeyError(m)
+	if err != nil {
+		log.Errorf(ctx, "Failed to Get Key of %v because of %v\n", m, err)
+		return false, err
+	}
+	_, err = s.ByKey(ctx, key)
+	if err == datastore.ErrNoSuchEntity {
+		return false, nil
+	} else if err != nil {
+		log.Errorf(ctx, "Failed to get existance of %v because of %v\n", m, err)
+		return false, err
+	} else {
+		return true, nil
+	}
+}
+
 func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
   err := m.PrepareToCreate()
   if err != nil {
     return nil, err
   }
-	return s.ValidateAndPut(ctx, m)
+	if err := m.Validate(); err != nil {
+		return nil, err
+	}
+
+<%- if model.goon['id_type'] == 'string' -%>
+	exist, err := s.Exist(ctx, m)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
+		return nil, fmt.Errorf("Duplicate Name error: %q of %v\n", m.Name, m)
+	}
+<%- end -%>
+
+  return s.Put(ctx, m)
 }
 
 func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
@@ -175,19 +208,25 @@ func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*
   if err != nil {
     return nil, err
   }
-	return s.ValidateAndPut(ctx, m)
-}
+	if err := m.Validate(); err != nil {
+		return nil, err
+	}
 
-func (s *<%= store_name %>) ValidateAndPut(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-	err := m.Validate()
+<%- if model.goon['id_type'] == 'string' -%>
+	exist, err := s.Exist(ctx, m)
 	if err != nil {
 		return nil, err
 	}
-	return s.Put(ctx, m)
+	if !exist {
+		log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
+		return nil, fmt.Errorf("No data to update %q of %v\n", m.Name, m)
+	}
+<%- end -%>
+
+  return s.Put(ctx, m)
 }
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-	g := GoonFromContext(ctx)
 <%- if model.goon['id_type'] == 'UUID' -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
@@ -199,6 +238,7 @@ func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*dat
 		return nil, err
 	}
 <%- end -%>
+	g := GoonFromContext(ctx)
 	key, err := g.Put(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Put %v because of %v\n", m, err)
