@@ -15,7 +15,7 @@ func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%=
 <%-
       comments = []
 
-      type.fields.each do |f|
+      type.fields_including_id.each do |f|
       pf = type.payload.fields.detect{|pf| f.name.underscore == pf.name }
       if pf.nil?
         comments << "#{f.name} no payload field"
@@ -47,7 +47,7 @@ func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type
 <%-
       comments = []
 
-      type.fields.each do |f|
+      type.fields_including_id.each do |f|
         mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
         if mf.nil?
           comments << "#{f.name} no media type field"

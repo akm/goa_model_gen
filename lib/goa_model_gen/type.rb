@@ -101,6 +101,15 @@ module GoaModelGen
       (conv == 'generate') && !fields.empty?
     end
 
+    def fields_including_id
+      if goon && goon['id_type'] == 'string'
+        id_field = Field.new(goon['id_name'], {'type' => 'string'})
+        [id_field] + fields
+      else
+        fields
+      end
+    end
+
   end
 
   class SwaggerDef < Type
