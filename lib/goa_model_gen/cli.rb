@@ -30,10 +30,10 @@ module GoaModelGen
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
       show_version_if_required
-      generator = new_generator
       load_types_for(paths) do |path, types|
+        generator = new_generator.tap{|g| g.types = types }
         dest = File.join(cfg.model_dir, File.basename(path, ".*") + ".go")
-        generator.run('templates/model.go.erb', types, dest)
+        generator.run('templates/model.go.erb', dest)
         system("gofmt -w #{dest}") unless cfg.gofmt_disabled
       end
     end
@@ -41,11 +41,11 @@ module GoaModelGen
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
       show_version_if_required
-      generator = new_generator
       load_types_for(paths) do |path, types|
+        generator = new_generator.tap{|g| g.types = types }
         dest = File.join(cfg.controller_dir, File.basename(path, ".*") + "_conv.go")
         if types.any?{|t| !!t.payload || !!t.media_type}
-          generator.run('templates/converter.go.erb', types, dest)
+          generator.run('templates/converter.go.erb', dest)
           system("gofmt -w #{dest}") unless cfg.gofmt_disabled
         end
       end
