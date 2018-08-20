@@ -17,6 +17,16 @@ module GoaModelGen
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
     end
 
+    desc "bootstrap", "Generate files not concerned with model"
+    def bootstrap
+      show_version_if_required
+      generator = new_generator
+      {
+        "templates/goon.go.erb" => "model/goon.go",
+      }.each do |template, dest|
+        generator.run(template, dest)
+      end
+    end
 
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
