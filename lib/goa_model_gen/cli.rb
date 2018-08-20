@@ -39,7 +39,7 @@ module GoaModelGen
     option :dir, type: :string, default: './model', desc: 'Output directory path'
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def model(*paths)
-      generator = GoaModelGen::Generator.new(File.expand_path('../templates/model.go.erb', __FILE__))
+      generator = new_generator('templates/model.go.erb')
       load_types_for(paths, options[:swagger_yaml]) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + ".go")
         generator.run(types, dest)
@@ -54,7 +54,7 @@ module GoaModelGen
     option :dir, type: :string, default: './controller', desc: 'Output directory path'
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def converter(*paths)
-      generator = GoaModelGen::Generator.new(File.expand_path('../templates/converter.go.erb', __FILE__))
+      generator = new_generator('templates/converter.go.erb')
       load_types_for(paths, options[:swagger_yaml]) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + "_conv.go")
         if types.any?{|t| !!t.payload || !!t.media_type}
@@ -67,6 +67,10 @@ module GoaModelGen
     end
 
     no_commands do
+      def new_generator(rel_path)
+        GoaModelGen::Generator.new(File.expand_path('../' + rel_path, __FILE__))
+      end
+
 
       def load_types_for(paths, swagger_yaml)
         swagger_loader = GoaModelGen::SwaggerLoader.new(swagger_yaml)
