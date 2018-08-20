@@ -196,7 +196,7 @@ func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*
 	}
 	if exist {
 		log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
-		return nil, fmt.Errorf("Duplicate Name error: %q of %v\n", m.Name, m)
+		return nil, fmt.Errorf("Duplicate <%= model.goon['id_name'] %> error: %q of %v\n", m.<%= model.goon['id_name'] %>, m)
 	}
 <%- end -%>
 
@@ -219,7 +219,7 @@ func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*
 	}
 	if !exist {
 		log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
-		return nil, fmt.Errorf("No data to update %q of %v\n", m.Name, m)
+		return nil, fmt.Errorf("No data to update %q of %v\n", m.<%= model.goon['id_name'] %>, m)
 	}
 <%- end -%>
 
