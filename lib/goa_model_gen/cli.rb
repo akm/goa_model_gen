@@ -1,6 +1,7 @@
 require "goa_model_gen"
 
 require "erb"
+require "pathname"
 
 require "thor"
 
@@ -9,6 +10,21 @@ require "goa_model_gen/generator"
 
 module GoaModelGen
   class Cli < Thor
+    class << self
+      def default_go_package!
+        gopath = ENV['GOPATH'] || ''
+        raise "$GOPATH not found" if gopath.empty?
+        return Pathname.new(Dir.pwd).relative_path_from(Pathname.new(File.join(gopath, "src"))).to_s
+      end
+
+      def default_go_package
+        return default_go_package!
+      rescue
+        nil
+      end
+    end
+
+    class_option :go_package, type: :string, default: default_go_package, desc: 'Base go package name'
     class_option :swagger_yaml, type: :string, default: './swagger/swagger.yaml', desc: 'Swagger definition YAML file'
 
     desc "show FILE1...", "Show model info from definition files"
