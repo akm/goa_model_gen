@@ -42,8 +42,13 @@ module GoaModelGen
       show_version_if_required
       load_types_for(paths) do |path, types|
         generator = new_generator.tap{|g| g.types = types }
-        dest = File.join(cfg.model_dir, File.basename(path, ".*") + ".go")
-        generator.run('templates/model.go.erb', dest, overwrite: true)
+        [
+          {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
+          {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
+        ].each do |d|
+          dest = File.join(cfg.model_dir, File.basename(path, ".*") + d[:suffix])
+          generator.run(d[:path], dest, overwrite: d[:overwrite])
+        end
       end
     end
 
