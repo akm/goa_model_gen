@@ -15,7 +15,8 @@ module GoaModelGen
       @config = config
     end
 
-    def run(rel_path, path)
+    def run(rel_path, path, overwrite: false)
+      return if File.exist?(path) && !overwrite
       abs_path = File.expand_path('../' + rel_path, __FILE__)
       erb = ERB.new(File.read(abs_path), nil, "-")
       erb.filename = abs_path
