@@ -23,6 +23,7 @@ module GoaModelGen
       generator = new_generator
       {
         "templates/goon.go.erb" => "model/goon.go",
+        "templates/converter_base.go.erb" => "controller/converter_base.go",
       }.each do |template, dest|
         generator.run(template, dest, overwrite: true)
       end
