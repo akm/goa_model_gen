@@ -8,16 +8,19 @@ require "goa_model_gen/generator"
 
 module GoaModelGen
   class Cli < Thor
+    class_option :version, type: :boolean, aliases: 'v', desc: 'Show version before processing'
     class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
     desc "config", "Generate config file"
     def config(path = './goa_model_gen.yaml')
+      show_version_if_required
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
     end
 
 
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
+      show_version_if_required
       load_types_for(paths) do |path, types|
         puts "types in #{path}"
         puts YAML.dump(types)
@@ -26,6 +29,7 @@ module GoaModelGen
 
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
+      show_version_if_required
       generator = new_generator
       load_types_for(paths) do |path, types|
         dest = File.join(cfg.model_dir, File.basename(path, ".*") + ".go")
@@ -36,6 +40,7 @@ module GoaModelGen
 
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
+      show_version_if_required
       generator = new_generator
       load_types_for(paths) do |path, types|
         dest = File.join(cfg.controller_dir, File.basename(path, ".*") + "_conv.go")
@@ -46,7 +51,20 @@ module GoaModelGen
       end
     end
 
+    desc "version", "Show version"
+    def version
+      show_version
+    end
+
     no_commands do
+      def show_version_if_required
+        show_version if options[:version]
+      end
+
+      def show_version
+        puts "#{$PROGRAM_NAME} version:#{::GoaModelGen::VERSION}"
+      end
+
       def cfg
         @cfg ||= GoaModelGen::Config.new.load_from(options[:config])
       end
