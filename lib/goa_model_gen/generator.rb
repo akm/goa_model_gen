@@ -9,14 +9,15 @@ module GoaModelGen
   class Generator
     attr_reader :go_package
 
-    def initialize(template_path, options = {})
-      @erb = ERB.new(File.read(template_path), nil, "-")
-      @erb.filename = template_path
+    def initialize(options = {})
       @go_package = options[:go_package]
     end
 
-    def run(types, path)
-      content = @erb.result(binding)
+    def run(rel_path, types, path)
+      abs_path = File.expand_path('../' + rel_path, __FILE__)
+      erb = ERB.new(File.read(abs_path), nil, "-")
+      erb.filename = abs_path
+      content = erb.result(binding)
       open(path, 'w'){|f| f.puts(content) }
     end
 

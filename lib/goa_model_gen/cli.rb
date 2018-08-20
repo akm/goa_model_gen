@@ -28,10 +28,10 @@ module GoaModelGen
     option :dir, type: :string, default: './model', desc: 'Output directory path'
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def model(*paths)
-      generator = new_generator('templates/model.go.erb')
+      generator = new_generator
       load_types_for(paths, options[:swagger_yaml]) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + ".go")
-        generator.run(types, dest)
+        generator.run('templates/model.go.erb', types, dest)
         if options[:gofmt]
           system("gofmt -w #{dest}")
         end
@@ -43,11 +43,11 @@ module GoaModelGen
     option :dir, type: :string, default: './controller', desc: 'Output directory path'
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def converter(*paths)
-      generator = new_generator('templates/converter.go.erb')
+      generator = new_generator
       load_types_for(paths, options[:swagger_yaml]) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + "_conv.go")
         if types.any?{|t| !!t.payload || !!t.media_type}
-          generator.run(types, dest)
+          generator.run('templates/converter.go.erb', types, dest)
           if options[:gofmt]
             system("gofmt -w #{dest}")
           end
@@ -56,11 +56,11 @@ module GoaModelGen
     end
 
     no_commands do
-      def new_generator(rel_path)
+      def new_generator
         opts = {
           go_package: options[:go_package],
         }
-        GoaModelGen::Generator.new(File.expand_path('../' + rel_path, __FILE__), opts)
+        GoaModelGen::Generator.new(opts)
       end
 
 
