@@ -21,6 +21,9 @@ module GoaModelGen
       erb.filename = abs_path
       content = erb.result(binding)
       open(path, 'w'){|f| f.puts(content) }
+      if (File.extname(path) == '.go') && !config.gofmt_disabled
+        system("gofmt -w #{path}")
+      end
     end
 
   end

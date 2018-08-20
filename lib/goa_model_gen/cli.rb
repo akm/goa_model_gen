@@ -44,7 +44,6 @@ module GoaModelGen
         generator = new_generator.tap{|g| g.types = types }
         dest = File.join(cfg.model_dir, File.basename(path, ".*") + ".go")
         generator.run('templates/model.go.erb', dest)
-        system("gofmt -w #{dest}") unless cfg.gofmt_disabled
       end
     end
 
@@ -56,7 +55,6 @@ module GoaModelGen
         dest = File.join(cfg.controller_dir, File.basename(path, ".*") + "_conv.go")
         if types.any?{|t| !!t.payload || !!t.media_type}
           generator.run('templates/converter.go.erb', dest)
-          system("gofmt -w #{dest}") unless cfg.gofmt_disabled
         end
       end
     end
