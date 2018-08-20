@@ -68,7 +68,10 @@ module GoaModelGen
 
     no_commands do
       def new_generator(rel_path)
-        GoaModelGen::Generator.new(File.expand_path('../' + rel_path, __FILE__))
+        opts = {
+          go_package: options[:go_package],
+        }
+        GoaModelGen::Generator.new(File.expand_path('../' + rel_path, __FILE__), opts)
       end
 
 

@@ -7,10 +7,12 @@ require "active_support/core_ext/string"
 
 module GoaModelGen
   class Generator
-    def initialize(template_path)
-      content = File
+    attr_reader :go_package
+
+    def initialize(template_path, options = {})
       @erb = ERB.new(File.read(template_path), nil, "-")
       @erb.filename = template_path
+      @go_package = options[:go_package]
     end
 
     def run(types, path)
