@@ -18,7 +18,7 @@ module GoaModelGen
 
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
-      load_types_for(paths, options[:swagger_yaml]) do |path, types|
+      load_types_for(paths) do |path, types|
         puts "types in #{path}"
         puts YAML.dump(types)
       end
@@ -29,7 +29,7 @@ module GoaModelGen
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def model(*paths)
       generator = new_generator
-      load_types_for(paths, options[:swagger_yaml]) do |path, types|
+      load_types_for(paths) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + ".go")
         generator.run('templates/model.go.erb', types, dest)
         if options[:gofmt]
@@ -44,7 +44,7 @@ module GoaModelGen
     option :gofmt, type: :boolean, default: true, desc: 'Run gofmt for generated file'
     def converter(*paths)
       generator = new_generator
-      load_types_for(paths, options[:swagger_yaml]) do |path, types|
+      load_types_for(paths) do |path, types|
         dest = File.join(options[:dir], File.basename(path, ".*") + "_conv.go")
         if types.any?{|t| !!t.payload || !!t.media_type}
           generator.run('templates/converter.go.erb', types, dest)
@@ -56,16 +56,16 @@ module GoaModelGen
     end
 
     no_commands do
-      def new_generator
-        opts = {
-          go_package: options[:go_package],
-        }
-        GoaModelGen::Generator.new(opts)
+      def config
+        @config ||= GoaModelGen::Config.new.load_from(options[:config)
       end
 
+      def new_generator
+        GoaModelGen::Generator.new(config)
+      end
 
-      def load_types_for(paths, swagger_yaml)
-        swagger_loader = GoaModelGen::SwaggerLoader.new(swagger_yaml)
+      def load_types_for(paths)
+        swagger_loader = GoaModelGen::SwaggerLoader.new(config.swagger_yaml)
         path_to_types = {}
         defined_types = {}
         paths.each do |path|

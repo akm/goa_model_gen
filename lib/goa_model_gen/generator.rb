@@ -7,10 +7,10 @@ require "active_support/core_ext/string"
 
 module GoaModelGen
   class Generator
-    attr_reader :go_package
+    attr_reader :config
 
-    def initialize(options = {})
-      @go_package = options[:go_package]
+    def initialize(config)
+      @config = config
     end
 
     def run(rel_path, types, path)
