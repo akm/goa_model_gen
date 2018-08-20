@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/groovenauts/blocks-concurrent-batch-server/app"
-	"github.com/groovenauts/blocks-concurrent-batch-server/model"
+	"<%= config.go_package %>/app"
+	"<%= config.go_package %>/model"
 )
 
 <%- types.select(&:gen_converter?).each do |type| -%>
