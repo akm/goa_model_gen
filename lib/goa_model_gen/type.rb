@@ -102,8 +102,8 @@ module GoaModelGen
     end
 
     def fields_including_id
-      if goon && goon['id_type'] == 'string'
-        id_field = Field.new(goon['id_name'], {'type' => 'string'})
+      if goon && goon['id_type']
+        id_field = Field.new(id_name, {'type' => goon['id_type']})
         [id_field] + fields
       else
         fields
