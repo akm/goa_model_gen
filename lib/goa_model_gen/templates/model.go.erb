@@ -80,21 +80,26 @@ type <%= store_name %> struct{
 }
 
 func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model.name %>, error) {
+	return s.Select(ctx, s.Query(ctx))
+}
+
+func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model.name %>, error) {
 	g := GoonFromContext(ctx)
 	r := []*<%= model.name %>{}
-	k := g.Kind(new(<%= model.name %>))
-	log.Infof(ctx, "Kind is %v\n", k)
-	q := datastore.NewQuery(k)
-<%- if model.parent -%>
-	q = q.Ancestor(s.ParentKey)
-<%- end -%>
 	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to GetAll <%= model.name %> because of %v\n", err)
+		log.Errorf(ctx, "Failed to Select <%= model.name %> because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *<%= store_name %>) Query(ctx context.Context) *datastore.Query {
+	g := GoonFromContext(ctx)
+	k := g.Kind(new(<%= model.name %>))
+	// log.Infof(ctx, "Kind for <%= model.name %> is %v\n", k)
+	return datastore.NewQuery(k)
 }
 
 func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model.name %>, error) {
