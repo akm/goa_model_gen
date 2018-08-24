@@ -1,4 +1,5 @@
 require 'goa_model_gen/field'
+require 'goa_model_gen/type'
 
 RSpec.describe GoaModelGen::Field do
   describe :tag do
@@ -43,14 +44,18 @@ RSpec.describe GoaModelGen::Field do
     end
   end
 
-  describe :payload_assignment_options do
-    let(:f_str  ){ GoaModelGen::Field.new("f", 'type' => 'string') }
-    let(:f_bool ){ GoaModelGen::Field.new("f", 'type' => 'bool') }
-    let(:f_int  ){ GoaModelGen::Field.new("f", 'type' => 'int') }
-    let(:f_time ){ GoaModelGen::Field.new("f", 'type' => 'time.Time') }
-    let(:f_dskey){ GoaModelGen::Field.new("f", 'type' => '*datastore.Key') }
-    let(:f_custom){ GoaModelGen::Field.new("f", 'type' => 'CustomType1') }
 
+  let(:f_str  ){ GoaModelGen::Field.new("f", 'type' => 'string') }
+  let(:f_bool ){ GoaModelGen::Field.new("f", 'type' => 'bool') }
+  let(:f_int  ){ GoaModelGen::Field.new("f", 'type' => 'int') }
+  let(:f_time ){ GoaModelGen::Field.new("f", 'type' => 'time.Time') }
+  let(:f_dskey){ GoaModelGen::Field.new("f", 'type' => '*datastore.Key') }
+  let(:f_custom){ GoaModelGen::Field.new("f", 'type' => 'CustomType1') }
+
+  let(:string_base_type1){ GoaModelGen::Model.new('StringBaseType1', 'base' => 'string') }
+  let(:int_base_type1){ GoaModelGen::Model.new('IntBaseType1', 'base' => 'int') }
+
+  describe :payload_assignment_options do
     let(:pf_str  ){ GoaModelGen::Field.new("f", 'type' => 'string') }
     let(:pf_bool ){ GoaModelGen::Field.new("f", 'type' => 'boolean') }
     let(:pf_int  ){ GoaModelGen::Field.new("f", 'type' => 'integer', 'format' => 'int64') }
@@ -86,6 +91,38 @@ RSpec.describe GoaModelGen::Field do
               expect(simple).to be_falsy
               expect(with_error).to be_falsy
               expect(method_name).to eq method_name
+            end
+          end
+        end
+
+        context "derived_type" do
+          [
+            {required: true , methods: 'StringBaseType1'},
+            {required: false, methods: ['StringPointerToString','StringBaseType1'] },
+          ].each do |ptn|
+            it "string base" do
+              pf = pf_str.tap{|pf| pf.required = ptn[:required]}
+              f = GoaModelGen::Field.new("f", 'type' => string_base_type1.name, 'required' => field_required)
+              f.assign_type_base(f.type => string_base_type1)
+              simple, with_error, method_name = f.payload_assignment_options(pf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq ptn[:methods]
+            end
+          end
+
+          [
+            {required: true , methods: 'IntBaseType1'},
+            {required: false, methods: ['IntPointerToInt', 'IntBaseType1'] },
+          ].each do |ptn|
+            it "int base" do
+              pf = pf_int.tap{|pf| pf.required = ptn[:required]}
+              f = GoaModelGen::Field.new("f", 'type' => int_base_type1.name, 'required' => field_required)
+              f.assign_type_base(f.type => int_base_type1)
+              simple, with_error, method_name = f.payload_assignment_options(pf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq ptn[:methods]
             end
           end
         end

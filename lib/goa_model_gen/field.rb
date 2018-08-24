@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'goa_model_gen'
 require 'goa_model_gen/goa'
 
@@ -101,7 +102,17 @@ module GoaModelGen
 
     def payload_assignment_options(f)
       if custom?
-        return false, true, "#{type}PayloadToModel"
+        if type_obj && type_obj.base
+          if f.not_null?
+            return false, false, type # 型キャスト
+          else
+            st = f.golang_type.camelize
+            dt = type_obj.base.camelize
+            return false, false, ["#{st}PointerTo#{dt}", type] # ポインタを値にしてから型キャスト
+          end
+        else
+          return false, true, "#{type}PayloadToModel"
+        end
       else
         if type == f.golang_type
           if f.not_null?
