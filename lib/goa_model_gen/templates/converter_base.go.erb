@@ -1,10 +1,15 @@
 package controller
 
 import (
+  "fmt"
 	"strconv"
 
 	"google.golang.org/appengine/datastore"
 )
+
+var NoModelGiven = fmt.Errorf("No model given")
+var NoPayloadGiven = fmt.Errorf("No payload given")
+var NoMediaTypeGiven = fmt.Errorf("No media type given")
 
 func BoolPointerToBool(v *bool) bool {
 	return BoolPointerToBoolWith(v, false)
