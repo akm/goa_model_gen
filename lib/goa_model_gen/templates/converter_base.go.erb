@@ -77,14 +77,17 @@ func StringPointerToDatastoreKeyPointer(v *string) (*datastore.Key, error) {
 	return StringToDatastoreKeyPointer(*v)
 }
 
-func DatastoreKeyPointerToString(key *datastore.Key) (string, error) {
+func DatastoreKeyPointerToString(key *datastore.Key) string {
 	if key == nil {
-		return "", nil
+		return ""
 	}
-	return key.Encode(), nil
+	return key.Encode()
 }
 
-func DatastoreKeyPointerToStringPointer(key *datastore.Key) (*string, error) {
-	s, err := DatastoreKeyPointerToString(key)
-	return &s, err
+func DatastoreKeyPointerToStringPointer(key *datastore.Key) *string {
+	if key == nil {
+		return nil
+	}
+	s := DatastoreKeyPointerToString(key)
+	return &s
 }
