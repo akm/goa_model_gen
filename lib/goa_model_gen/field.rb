@@ -21,7 +21,7 @@ module GoaModelGen
     end
 
     # https://goa.design/design/overview/
-    PRIMITIVE_TYPES = %q[bool int int64 float string time.Time uuid.UUID interface{}]
+    PRIMITIVE_TYPES = %w[bool int int64 float string time.Time uuid.UUID *datastore.Key]
 
     def goa_name
       Goa.capitalize_join(name.split("_"))
@@ -78,8 +78,43 @@ module GoaModelGen
 
     def golang_type
       format2type = SWAGGER_TYPE_TO_GOLANG_TYPE[type]
-      raise "Golang type not found for #{type}" unless format2type
+      raise "Golang type not found for #{self.inspect}" unless format2type
       return format2type[format]
     end
+
+    def conv_func_part_for_model
+      conv_func_part_for(type, !!(/\A\*/ =~ type))
+    end
+
+    def conv_func_part_for_payload
+      conv_func_part_for(golang_type, nullable?)
+    end
+
+    def conv_func_part_for_media_type
+      conv_func_part_for(golang_type, nullable?)
+    end
+
+    def conv_func_part_for(value, with_pointer)
+      r = value.sub(/\A\*/, '').split('.').map(&:camelize).join
+      with_pointer ? "#{r}Pointer" : r
+    end
+
+    def payload_assignment_options(f)
+      if custom?
+        return false, true, "#{type}PayloadToModel"
+      else
+        if type == f.golang_type
+          if f.not_null?
+            return true, nil, nil
+          else
+            return false, false, "#{f.conv_func_part_for_payload}To#{conv_func_part_for_model}"
+          end
+        else
+          with_error = (f.type == 'string')
+          return false, with_error, "#{f.conv_func_part_for_payload}To#{conv_func_part_for_model}"
+        end
+      end
+    end
+
   end
 end
