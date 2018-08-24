@@ -54,9 +54,8 @@ func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %
   }
 <%-     end -%>
 <%-   end -%>
-
 <%- end -%>
-<%- type.payload.field_diffs(type.fields.map{|f| f.name.underscore}).each do |pf| -%>
+<%- type.payload.field_diffs(type.fields_including_id.map{|f| f.name.underscore}).each do |pf| -%>
   // No model field for payload field "<%= pf.name %>"
 <%- end -%>
   return nil
@@ -72,7 +71,7 @@ func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= t
 
 <%-
       type.fields_including_id.each do |f|
-        mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
+        mf = type.media_type.fields.detect{|mf| f.name.underscore == mf.name }
         if mf.nil?
 -%>
   // <%= f.name %> not found for media type field
@@ -93,7 +92,7 @@ func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= t
 <%-       end
         end -%>
 <%-   end -%>
-<%-   type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
+<%-   type.media_type.field_diffs(type.fields_including_id.map{|f| f.name.underscore}).each do |mf| -%>
     // No model field for media type field "<%= mf.name %>"
 <%-   end -%>
   return r, nil
