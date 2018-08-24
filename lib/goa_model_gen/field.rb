@@ -127,5 +127,32 @@ module GoaModelGen
       end
     end
 
+    def media_type_assignment_options(f)
+      if custom?
+        if type_obj && type_obj.base
+          if f.not_null?
+            return false, false, type_obj.base # 型キャスト
+          else
+            st = type_obj.base.camelize
+            dt = f.golang_type.camelize
+            return false, false, [type_obj.base, "#{st}To#{dt}Pointer"] # 型キャストしてポインタを値に変換
+          end
+        else
+          return false, true, "#{type}ModelToMediaType"
+        end
+      else
+        if type == f.golang_type
+          if f.not_null?
+            return true, nil, nil
+          else
+            return false, false, "#{conv_func_part_for_model}To#{f.conv_func_part_for_payload}"
+          end
+        else
+          with_error = (type == 'string')
+          return false, with_error, "#{conv_func_part_for_model}To#{f.conv_func_part_for_payload}"
+        end
+      end
+    end
+
   end
 end

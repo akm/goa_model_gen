@@ -171,8 +171,125 @@ RSpec.describe GoaModelGen::Field do
 
       end
     end
+  end
 
 
+  describe :media_type_assignment_options do
+    let(:mf_str  ){ GoaModelGen::Field.new("f", 'type' => 'string') }
+    let(:mf_bool ){ GoaModelGen::Field.new("f", 'type' => 'boolean') }
+    let(:mf_int  ){ GoaModelGen::Field.new("f", 'type' => 'integer', 'format' => 'int64') }
+    let(:mf_time ){ GoaModelGen::Field.new("f", 'type' => 'string', 'format' => 'date-time') }
+    let(:mf_custom){ GoaModelGen::Field.new("f", 'type' => '') }
+
+    [false, true].each do |field_required|
+      context "model_field_required: #{field_required.inspect}" do
+        context "same type" do
+          [:str, :bool, :int, :time].each do |base_type|
+            it base_type do
+              f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
+              mf = send(:"mf_#{base_type}").tap{|mf| mf.required = true}
+              simple, with_error, method_name = f.media_type_assignment_options(mf)
+              expect(simple).to be_truthy
+              expect(with_error).to be_nil
+              expect(method_name).to be_nil
+            end
+          end
+        end
+
+        context "nullable" do
+          {
+            str: 'StringToStringPointer',
+            bool: 'BoolToBoolPointer',
+            int: 'IntToIntPointer',
+            time: 'TimeToTimePointer',
+          }.each do |base_type, method_name|
+            it base_type do
+              f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
+              mf = send(:"mf_#{base_type}").tap{|mf| mf.required = false}
+              simple, with_error, method_name = f.media_type_assignment_options(mf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq method_name
+            end
+          end
+        end
+
+        context "custom" do
+          it "custom" do
+            f = f_custom.tap{|f| f.required = field_required}
+            mf = mf_custom.tap{|mf| mf.required = true}
+            simple, with_error, method_name = f.media_type_assignment_options(mf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_truthy
+            expect(method_name).to eq "CustomType1ModelToMediaType"
+          end
+        end
+
+        context "derived_type" do
+          [
+            {required: true , methods: 'string'},
+            {required: false, methods: ['string', 'StringToStringPointer'] },
+          ].each do |ptn|
+            it "string base" do
+              mf = mf_str.tap{|mf| mf.required = ptn[:required]}
+              f = GoaModelGen::Field.new("f", 'type' => string_base_type1.name, 'required' => field_required)
+              f.assign_type_base(f.type => string_base_type1)
+              simple, with_error, method_name = f.media_type_assignment_options(mf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq ptn[:methods]
+            end
+          end
+
+          [
+            {required: true , methods: 'int'},
+            {required: false, methods: ['int', 'IntToIntPointer'] },
+          ].each do |ptn|
+            it "int base" do
+              mf = mf_int.tap{|mf| mf.required = ptn[:required]}
+              f = GoaModelGen::Field.new("f", 'type' => int_base_type1.name, 'required' => field_required)
+              f.assign_type_base(f.type => int_base_type1)
+              simple, with_error, method_name = f.media_type_assignment_options(mf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq ptn[:methods]
+            end
+          end
+        end
+
+        context "parsing" do
+          it "int" do
+            f = f_str.tap{|f| f.required = field_required}
+            mf = mf_int.tap{|mf| mf.required = true}
+            simple, with_error, method_name = f.media_type_assignment_options(mf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_truthy
+            expect(method_name).to eq "StringToInt"
+          end
+        end
+
+        context "format" do
+          it "datastore.Key" do
+            f = f_dskey.tap{|f| f.required = field_required}
+            mf = mf_str.tap{|mf| mf.required = false}
+            simple, with_error, method_name = f.media_type_assignment_options(mf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_falsy
+            expect(method_name).to eq "DatastoreKeyPointerToStringPointer"
+          end
+
+          it "int" do
+            f = f_int.tap{|f| f.required = field_required}
+            mf = mf_str.tap{|mf| mf.required = true}
+            simple, with_error, method_name = f.media_type_assignment_options(mf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_falsy
+            expect(method_name).to eq "IntToString"
+          end
+        end
+
+      end
+    end
   end
 
 end
