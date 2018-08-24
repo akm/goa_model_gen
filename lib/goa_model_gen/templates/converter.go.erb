@@ -1,3 +1,12 @@
+<%-
+def method_calling_exp(m, argument)
+  if m.is_a?(Array)
+    m.reverse.join('(') + argument + (')' * m.length)
+  else
+    "#{m}(#{argument})"
+  end
+end
+-%>
 package controller
 
 import (
@@ -7,71 +16,87 @@ import (
 
 <%- types.select(&:gen_converter?).each do |type| -%>
 <%-   if type.payload -%>
-func <%= type.name %>PayloadToModel(src *app.<%= type.payload_name %>) model.<%= type.name %> {
-	if src == nil {
-		return model.<%= type.name %>{}
+func <%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
+	model := &model.<%= type.name %>{}
+	if err := CopyFrom<%= type.name %>PayloadToModel(payload, model); err != nil {
+		return nil, err
 	}
-  return model.<%= type.name %>{
-<%-
-      comments = []
+	return model, nil
+}
 
+func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>, model *model.<%= type.name %>) error {
+  if payload == nil {
+    return NoPayloadGiven
+  }
+  if model == nil {
+    return NoModelGiven
+  }
+
+<%-
       type.fields_including_id.each do |f|
       pf = type.payload.fields.detect{|pf| f.name.underscore == pf.name }
       if pf.nil?
-        comments << "#{f.name} no payload field"
-      elsif f.custom?
 -%>
-    <%= f.name %>: <%= f.type %>PayloadToModel(src.<%= f.name %>),
-<%-   elsif pf.nullable? -%>
-    <%= f.name %>: <%= f.type.camelize %>PointerTo<%= f.type.camelize %>(src.<%= f.name %>),
-<%-   else -%>
-    <%= f.name %>: src.<%= f.name %>,
+  // <%= f.name %> not found in payload fields
+<%-
+      else
+        simple, with_error, method_name = f.payload_assignment_options(pf)
+-%>
+<%-     if simple -%>
+  model.<%= f.name %> = payload.<%= f.name %>
+<%-     elsif !with_error -%>
+  model.<%= f.name %> = <%= method_calling_exp(method_name, "payload.#{f.name}") %>
+<%-     else -%>
+  if v, err := <%= method_calling_exp(method_name, "payload.#{f.name}") %>; err != nil {
+    return err
+  } else {
+    model.<%= f.name %> = v
+  }
+<%-     end -%>
 <%-   end -%>
-<%- end -%>
-<%- comments.each do |comment| -%>
-    // <%= comment %>
+
 <%- end -%>
 <%- type.payload.field_diffs(type.fields.map{|f| f.name.underscore}).each do |pf| -%>
-    // No model field for payload field "<%= pf.name %>"
+  // No model field for payload field "<%= pf.name %>"
 <%- end -%>
-  }
+  return nil
 }
 
 <%-   end -%>
 <%-   if type.media_type -%>
-func <%= type.name %>ModelToMediaType(src *model.<%= type.name %>) *app.<%= type.media_type_name_for_go %> {
-	if src == nil {
-		return nil
-	}
-  return &app.<%= type.media_type_name_for_go %>{
-<%-
-      comments = []
+func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= type.media_type_name_for_go %>, error) {
+  if model == nil {
+    return nil, NoModelGiven
+  }
+  r := &app.<%= type.media_type_name_for_go %>{}
 
+<%-
       type.fields_including_id.each do |f|
         mf = type.media_type.fields.detect{|mf| f.name == mf.name.camelize }
         if mf.nil?
-          comments << "#{f.name} no media type field"
-        elsif f.custom?
-          if f.type_obj && f.type_obj.base -%>
-    <%= mf.goa_name %>: <%= f.type_obj.base %>(src.<%= f.name %>),
+-%>
+  // <%= f.name %> not found for media type field
+<%-
+        else
+          simple, with_error, method_name = f.media_type_assignment_options(mf)
+-%>
+<%-       if simple -%>
+  r.<%= mf.goa_name %> = model.<%= f.name %>
+<%-       elsif !with_error -%>
+  r.<%= mf.goa_name %> = <%= method_calling_exp(method_name, "model.#{f.name}") %>
 <%-       else -%>
-    <%= mf.goa_name %>: <%= f.type %>ModelToMediaType(&src.<%= f.name %>),
+  if val, err := <%= method_calling_exp(method_name, "model.#{f.name}") %>; err != nil {
+     return nil, err
+  } else {
+    r.<%= mf.goa_name %> = val
+  }
 <%-       end
-        else -%>
-<%-       if mf.golang_type == f.type -%>
-    <%= mf.goa_name %>: <%= mf.nullable? ? '&' : '' %>src.<%= f.name %>,
-<%-       else -%>
-    <%= mf.goa_name %>: <%= f.type.camelize %>To<%= mf.golang_type.camelize %><%= mf.nullable? ? 'Pointer' : '' %>(src.<%= f.name %>),
-<%-       end -%>
-<%-     end -%>
-<%-   end -%>
-<%-   comments.each do |comment| -%>
-    // <%= comment %>
+        end -%>
 <%-   end -%>
 <%-   type.media_type.field_diffs(type.fields.map{|f| f.name.underscore}).each do |mf| -%>
-    // No field for media type field "<%= mf.name %>"
+    // No model field for media type field "<%= mf.name %>"
 <%-   end -%>
-  }
+  return r, nil
 }
 
 <%-   end -%>
