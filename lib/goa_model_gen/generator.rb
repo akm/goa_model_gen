@@ -9,7 +9,7 @@ module GoaModelGen
   class Generator
     # These are used in templates
     attr_reader :config
-    attr_accessor :types
+    attr_accessor :source_file
 
     def initialize(config)
       @config = config

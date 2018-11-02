@@ -52,14 +52,14 @@ RSpec.describe GoaModelGen::Type do
     it :generate do
       Dir.mktmpdir do |dir|
         path = File.join(dir, 'user.go')
-        generator.types = [user]
+        generator.source_file = GoaModelGen::SourceFile.new('', [user])
         generator.run('templates/model.go.erb', path)
         expect(File.read(path)).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__))
       end
     end
 
     it :generate_model do
-      generator.types = [user]
+      generator.source_file = GoaModelGen::SourceFile.new('', [user])
       expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__))
       expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__))
     end
@@ -83,7 +83,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
 
     it :generate_model do
-      generator.types = [memo]
+      generator.source_file = GoaModelGen::SourceFile.new('', [memo])
       expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__))
       expect(generator.generate('templates/model_validation.go.erb')). to eq File.read(File.expand_path('../project1/model/memo_validation.go', __FILE__))
     end
@@ -101,7 +101,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Name').definition).to eq 'Name string `json:"name" validate:"required"`'}
 
     it :generate_model do
-      generator.types = [component1]
+      generator.source_file = GoaModelGen::SourceFile.new('', [component1])
       expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only.go', __FILE__))
       expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only_validation.go', __FILE__))
     end
@@ -122,7 +122,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Components').definition).to eq 'Components []Component1 `json:"components,omitempty"`'}
 
     it :generate do
-      generator.types = [component1, composite]
+      generator.source_file = GoaModelGen::SourceFile.new('', [component1, composite])
       expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/composite.go', __FILE__))
       expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/composite_validation.go', __FILE__))
     end

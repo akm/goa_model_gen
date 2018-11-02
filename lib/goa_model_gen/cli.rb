@@ -42,7 +42,7 @@ module GoaModelGen
     def model(*paths)
       show_version_if_required
       load_types_for(paths) do |source_file|
-        generator = new_generator.tap{|g| g.types = source_file.types }
+        generator = new_generator.tap{|g| g.source_file = source_file }
         [
           {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
           {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
