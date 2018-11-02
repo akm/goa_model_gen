@@ -1,0 +1,24 @@
+anchors:
+- &string_required
+  type: string
+  required: true
+- &time_required
+  type: time.Time
+  required: true
+
+types:
+  Memo:
+    goon:
+      id_type: int64
+      # id_type: string
+      # id_type: UUID (type: string)
+    payload: MemoPayload
+    media_type: Memo
+    fields:
+      AuthorKey:
+        type: "*datastore.Key"
+        required: true
+      Content: string
+      Shared: bool
+      CreatedAt: *time_required
+      UpdatedAt: *time_required

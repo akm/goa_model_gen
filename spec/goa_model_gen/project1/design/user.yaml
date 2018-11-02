@@ -1,0 +1,27 @@
+anchors:
+- &string_required
+  type: string
+  required: true
+- &time_required
+  type: time.Time
+  required: true
+
+types:
+  User:
+    goon:
+      # id_type: int64
+      # id_type: string
+      # id_type: UUID (type: string)
+      id_name: ID
+      id_type: string
+    fields:
+      # See https://godoc.org/google.golang.org/appengine/user#User
+      Email: string
+      AuthDomain: string
+      Admin: bool
+      # ID:  string
+      ClientID: string
+      FederatedIdentity: string
+      FederatedProvider: string
+      CreatedAt: *time_required
+      UpdatedAt: *time_required
