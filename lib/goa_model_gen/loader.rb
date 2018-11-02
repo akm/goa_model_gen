@@ -4,6 +4,7 @@ require "yaml"
 
 require "goa_model_gen/type"
 require "goa_model_gen/field"
+require "goa_model_gen/source_file"
 
 module GoaModelGen
   class BaseLoader
@@ -112,11 +113,11 @@ module GoaModelGen
         types.each{|t| defined_types[t.name] = t }
         path_to_types[path] = types
       end
-      paths.each do |path|
+      paths.map do |path|
         types = path_to_types[path]
         types.each{|t| t.assign_field_type_base(defined_types) }
+        SourceFile.new(path, types)
       end
-      return path_to_types
     end
   end
 end

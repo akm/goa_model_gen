@@ -15,8 +15,8 @@ RSpec.describe GoaModelGen::Type do
   let(:model_yamls){ Dir.glob(File.expand_path('../project1/design/*.yaml', __FILE__)) }
 
   let(:loader){ GoaModelGen::Loader.new(config) }
-  let(:path_to_types){ loader.load_types(model_yamls) }
-  let(:types){ path_to_types.values.flatten }
+  let(:source_files){ loader.load_types(model_yamls) }
+  let(:types){ source_files.map(&:types).flatten }
 
   let(:user){ types.detect{|t| t.name == "User"} }
   let(:memo){ types.detect{|t| t.name == "Memo"} }

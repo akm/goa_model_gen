@@ -32,22 +32,22 @@ module GoaModelGen
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
       show_version_if_required
-      load_types_for(paths) do |path, types|
-        puts "types in #{path}"
-        puts YAML.dump(types)
+      load_types_for(paths) do |source_file|
+        puts "types in #{source_file.yaml_path}"
+        puts YAML.dump(source_file.types)
       end
     end
 
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
       show_version_if_required
-      load_types_for(paths) do |path, types|
-        generator = new_generator.tap{|g| g.types = types }
+      load_types_for(paths) do |source_file|
+        generator = new_generator.tap{|g| g.types = source_file.types }
         [
           {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
           {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
         ].each do |d|
-          dest = File.join(cfg.model_dir, File.basename(path, ".*") + d[:suffix])
+          dest = File.join(cfg.model_dir, File.basename(source_file.path, ".*") + d[:suffix])
           generator.run(d[:path], dest, overwrite: d[:overwrite])
         end
       end
@@ -56,10 +56,10 @@ module GoaModelGen
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
       show_version_if_required
-      load_types_for(paths) do |path, types|
-        generator = new_generator.tap{|g| g.types = types }
-        dest = File.join(cfg.controller_dir, File.basename(path, ".*") + "_conv.go")
-        if types.any?{|t| !!t.payload || !!t.media_type}
+      load_types_for(paths) do |source_file|
+        generator = new_generator.tap{|g| g.types = source_file.types }
+        dest = File.join(cfg.controller_dir, File.basename(source_file.yaml_path, ".*") + "_conv.go")
+        if source_file.types.any?{|t| !!t.payload || !!t.media_type}
           generator.run('templates/converter.go.erb', dest, overwrite: true)
         end
       end
@@ -89,9 +89,9 @@ module GoaModelGen
 
       def load_types_for(paths)
         loader = GoaModelGen::Loader.new(cfg)
-        path_to_types = loader.load(paths)
-        paths.each do |path|
-          yield(path, path_to_types[path])
+        source_files = loader.load(paths)
+        source_files.each do |source_file|
+          yield(source_file)
         end
       end
     end
