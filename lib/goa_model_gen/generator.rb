@@ -15,15 +15,15 @@ module GoaModelGen
       @config = config
     end
 
-    def run(rel_path, path, overwrite: false)
-      return if File.exist?(path) && !overwrite
-      abs_path = File.expand_path('../' + rel_path, __FILE__)
+    def run(template_path, output_path, overwrite: false)
+      return if File.exist?(output_path) && !overwrite
+      abs_path = File.expand_path('../' + template_path, __FILE__)
       erb = ERB.new(File.read(abs_path), nil, "-")
       erb.filename = abs_path
       content = erb.result(binding)
-      open(path, 'w'){|f| f.puts(content) }
-      if (File.extname(path) == '.go') && !config.gofmt_disabled
-        system("gofmt -w #{path}")
+      open(output_path, 'w'){|f| f.puts(content) }
+      if (File.extname(output_path) == '.go') && !config.gofmt_disabled
+        system("gofmt -w #{output_path}")
       end
     end
 
