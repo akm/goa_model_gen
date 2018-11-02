@@ -1,0 +1,21 @@
+anchors:
+- &string_required
+  type: string
+  required: true
+- &time_required
+  type: time.Time
+  required: true
+
+types:
+  Component1:
+    fields:
+      Name: *string_required
+  Composite:
+    goon:
+      id_type: UUID
+    fields:
+      MainComponent:
+        type: Component1
+        required: true
+      Components:
+        type: "[]Component1"

@@ -59,7 +59,7 @@ module GoaModelGen
     end
 
     def id_definition
-      "#{id_name} #{id_golang_type } `datastore:\"-\" goon:\"id\" json:\"#{ id_name.underscore }\"`"
+      goon && "#{id_name} #{id_golang_type } `datastore:\"-\" goon:\"id\" json:\"#{ id_name.underscore }\"`"
     end
 
     def parent
