@@ -32,6 +32,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq "string" }
 
     it{ expect(subject.id_definition).to eq 'ID string `datastore:"-" goon:"id" json:"id"`' }
+    it{ expect(subject.use_uuid?).to be_falsy }
 
     it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email,omitempty"`'}
     it{ expect(subject.field_by('AuthDomain').definition).to eq 'AuthDomain string `json:"auth_domain,omitempty"`'}
@@ -52,6 +53,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq "int64" }
 
     it{ expect(subject.id_definition).to eq 'Id int64 `datastore:"-" goon:"id" json:"id"`' }
+    it{ expect(subject.use_uuid?).to be_falsy }
 
     it{ expect(subject.field_by('AuthorKey').definition).to eq 'AuthorKey *datastore.Key `json:"author_key" validate:"required"`'}
     it{ expect(subject.field_by('Content').definition).to eq 'Content string `json:"content,omitempty"`'}
@@ -67,6 +69,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq nil }
 
     it{ expect(subject.id_definition).to eq nil }
+    it{ expect(subject.use_uuid?).to be_falsy }
 
     it{ expect(subject.field_by('Name').definition).to eq 'Name string `json:"name" validate:"required"`'}
   end
@@ -80,6 +83,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq "string" }
 
     it{ expect(subject.id_definition).to eq 'Id string `datastore:"-" goon:"id" json:"id"`' }
+    it{ expect(subject.use_uuid?).to be_truthy }
 
     it{ expect(subject.field_by('MainComponent').definition).to eq 'MainComponent Component1 `json:"main_component" validate:"required"`'}
     it{ expect(subject.field_by('Components').definition).to eq 'Components []Component1 `json:"components,omitempty"`'}

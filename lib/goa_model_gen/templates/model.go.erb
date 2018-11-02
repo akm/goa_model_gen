@@ -8,7 +8,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-<%- if types.select(&:store?).any?{|m| m.goon['id_type'] == 'UUID'} -%>
+<%- if types.any?(&:use_uuid?) -%>
 	"github.com/goadesign/goa/uuid"
 <%- end -%>
 )

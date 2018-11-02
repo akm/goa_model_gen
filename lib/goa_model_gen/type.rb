@@ -16,6 +16,10 @@ module GoaModelGen
     def assign_field_type_base(types)
       self.fields.each{|f| f.assign_type_base(types) }
     end
+
+    def use_uuid?
+      false
+    end
   end
 
   class Model < Type
@@ -68,6 +72,11 @@ module GoaModelGen
 
     def store?
       !!goon
+    end
+
+    # @override
+    def use_uuid?
+      goon && (goon['id_type'] == 'UUID')
     end
 
     def key_id_method
