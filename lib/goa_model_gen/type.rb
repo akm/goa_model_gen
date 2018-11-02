@@ -114,6 +114,9 @@ module GoaModelGen
       end
     end
 
+    def field_by(name)
+      fields.detect{|f| f.name == name}
+    end
   end
 
   class SwaggerDef < Type

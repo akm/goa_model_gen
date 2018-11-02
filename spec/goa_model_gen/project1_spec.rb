@@ -30,6 +30,15 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq "string" }
 
     it{ expect(subject.id_definition).to eq 'ID string `datastore:"-" goon:"id" json:"id"`' }
+
+    it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email,omitempty"`'}
+    it{ expect(subject.field_by('AuthDomain').definition).to eq 'AuthDomain string `json:"auth_domain,omitempty"`'}
+    it{ expect(subject.field_by('Admin').definition).to eq 'Admin bool `json:"admin,omitempty"`'}
+    it{ expect(subject.field_by('ClientID').definition).to eq 'ClientID string `json:"client_id,omitempty"`'}
+    it{ expect(subject.field_by('FederatedIdentity').definition).to eq 'FederatedIdentity string `json:"federated_identity,omitempty"`'}
+    it{ expect(subject.field_by('FederatedProvider').definition).to eq 'FederatedProvider string `json:"federated_provider,omitempty"`'}
+    it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
+    it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
   end
 
   context :memo do
@@ -41,6 +50,12 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_golang_type).to eq "int64" }
 
     it{ expect(subject.id_definition).to eq 'Id int64 `datastore:"-" goon:"id" json:"id"`' }
+
+    it{ expect(subject.field_by('AuthorKey').definition).to eq 'AuthorKey *datastore.Key `json:"author_key" validate:"required"`'}
+    it{ expect(subject.field_by('Content').definition).to eq 'Content string `json:"content,omitempty"`'}
+    it{ expect(subject.field_by('Shared').definition).to eq 'Shared bool `json:"shared,omitempty"`'}
+    it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
+    it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
   end
 
 end

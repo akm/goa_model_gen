@@ -23,7 +23,7 @@ type <%= type.name %> struct {
 <%-       end -%>
 <%-     end -%>
 <%-     type.fields.each do |field| -%>
-	<%= field.name %> <%= field.type %> `<%= field.tag %>`
+	<%= field.definition %>
 <%-     end -%>
 }
 <%-   elsif type.base -%>
