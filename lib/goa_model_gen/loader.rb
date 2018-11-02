@@ -17,13 +17,6 @@ module GoaModelGen
       @raw = YAML.load_file(path)
     end
 
-    def load_file
-      types = raw[types_key].map do |name, definition|
-        build_type(name, definition)
-      end
-      SourceFile.new(path, types)
-    end
-
     def build_type(name, d)
       kind.new(name, d).tap do |t|
         if d[fields_key]
@@ -55,6 +48,13 @@ module GoaModelGen
   class ModelLoader < BaseLoader
     def initialize(path)
       super(path, Model, 'types', 'fields')
+    end
+
+    def load_file
+      types = raw[types_key].map do |name, definition|
+        build_type(name, definition)
+      end
+      SourceFile.new(path, types)
     end
 
     def build_field(name, f)
