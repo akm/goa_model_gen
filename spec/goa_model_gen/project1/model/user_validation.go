@@ -4,10 +4,8 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-<%- source_file.types.select(&:store?).each do |model| -%>
-func (m *<%= model.name %>) Validate() error {
+func (m *User) Validate() error {
 	validator := validator.New()
 	return validator.Struct(m)
 }
 
-<%- end -%>

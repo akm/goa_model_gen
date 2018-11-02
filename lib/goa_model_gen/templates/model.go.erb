@@ -1,19 +1,17 @@
 package model
 
+<%- unless source_file.model_dependencies.empty? -%>
 import (
-  "fmt"
-  "time"
+<%- golang_helper.partition(source_file.model_dependencies).each do |group| -%>
+<%-   group.each do |path| -%>
+  "<%= path %>"
+<%-   end -%>
 
-  "golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
-
-<%- if types.any?(&:use_uuid?) -%>
-	"github.com/goadesign/goa/uuid"
 <%- end -%>
 )
+<%- end -%>
 
-<%- types.each do |type| -%>
+<%- source_file.types.each do |type| -%>
 <%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
@@ -40,7 +38,7 @@ const (
 
 <%- end -%>
 
-<%- types.select(&:store?).each do |model| -%>
+<%- source_file.types.select(&:store?).each do |model| -%>
 func (m *<%= model.name %>) PrepareToCreate() error {
 <%- if model.fields.any?{|f| f.name == "CreatedAt"} -%>
 	if m.CreatedAt.IsZero() {
@@ -71,7 +69,7 @@ func (m *<%= model.name %>) Parent(ctx context.Context) (*<%= model.parent %>, e
 
 <%- end -%>
 
-<%- types.select(&:store?).each do |model| -%>
+<%- source_file.types.select(&:store?).each do |model| -%>
 <%- store_name = "#{model.name}Store" -%>
 type <%= store_name %> struct{
 <%- if model.parent -%>
