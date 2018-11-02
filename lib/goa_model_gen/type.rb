@@ -58,6 +58,10 @@ module GoaModelGen
       s.blank? ? nil : s[0].downcase + s[1..-1]
     end
 
+    def id_definition
+      "#{id_name} #{id_golang_type } `datastore:\"-\" goon:\"id\" json:\"#{ id_name.underscore }\"`"
+    end
+
     def parent
       goon && goon['parent']
     end

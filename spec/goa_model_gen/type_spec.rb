@@ -28,6 +28,8 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.goon['id_name']).to eq 'ID' }
     it{ expect(subject.id_name).to eq "ID" }
     it{ expect(subject.id_golang_type).to eq "string" }
+
+    it{ expect(subject.id_definition).to eq 'ID string `datastore:"-" goon:"id" json:"id"`' }
   end
 
   context :memo do
@@ -37,6 +39,8 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.goon['id_name']).to eq nil }
     it{ expect(subject.id_name).to eq "Id" }
     it{ expect(subject.id_golang_type).to eq "int64" }
+
+    it{ expect(subject.id_definition).to eq 'Id int64 `datastore:"-" goon:"id" json:"id"`' }
   end
 
 end

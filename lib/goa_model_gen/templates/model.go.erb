@@ -17,7 +17,7 @@ import (
 <%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
-	<%= type.id_name %> <%= type.id_golang_type %> `datastore:"-" goon:"id" json:"<%= type.id_name.underscore %>"`
+	<%= type.id_definition %>
 <%-       if type.parent -%>
 	ParentKey *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
