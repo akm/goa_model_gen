@@ -16,6 +16,10 @@ module GoaModelGen
     def assign_field_type_base(types)
       self.fields.each{|f| f.assign_type_base(types) }
     end
+
+    def use_uuid?
+      false
+    end
   end
 
   class Model < Type
@@ -58,12 +62,21 @@ module GoaModelGen
       s.blank? ? nil : s[0].downcase + s[1..-1]
     end
 
+    def id_definition
+      goon && "#{id_name} #{id_golang_type } `datastore:\"-\" goon:\"id\" json:\"#{ id_name.underscore }\"`"
+    end
+
     def parent
       goon && goon['parent']
     end
 
     def store?
       !!goon
+    end
+
+    # @override
+    def use_uuid?
+      goon && (goon['id_type'] == 'UUID')
     end
 
     def key_id_method
@@ -110,6 +123,9 @@ module GoaModelGen
       end
     end
 
+    def field_by(name)
+      fields.detect{|f| f.name == name}
+    end
   end
 
   class SwaggerDef < Type

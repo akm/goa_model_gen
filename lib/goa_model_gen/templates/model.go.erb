@@ -8,7 +8,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-<%- if types.select(&:store?).any?{|m| m.goon['id_type'] == 'UUID'} -%>
+<%- if types.any?(&:use_uuid?) -%>
 	"github.com/goadesign/goa/uuid"
 <%- end -%>
 )
@@ -17,13 +17,13 @@ import (
 <%-   if !type.fields.empty? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
-	<%= type.id_name %> <%= type.id_golang_type %> `datastore:"-" goon:"id" json:"<%= type.id_name.underscore %>"`
+	<%= type.id_definition %>
 <%-       if type.parent -%>
 	ParentKey *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
 <%-     end -%>
 <%-     type.fields.each do |field| -%>
-	<%= field.name %> <%= field.type %> `<%= field.tag %>`
+	<%= field.definition %>
 <%-     end -%>
 }
 <%-   elsif type.base -%>

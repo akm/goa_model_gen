@@ -62,6 +62,10 @@ module GoaModelGen
       ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
     end
 
+    def definition
+      "#{ name } #{ type } `#{ tag }`"
+    end
+
     # https://swagger.io/docs/specification/data-models/data-types/
     # https://tour.golang.org/basics/11
     # https://golang.org/pkg/go/types/#pkg-variables
