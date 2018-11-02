@@ -95,4 +95,28 @@ module GoaModelGen
       r
     end
   end
+
+  class Loader
+    attr_reader :config
+    def initialize(config)
+      @config = config
+    end
+
+    def load_types(paths)
+      swagger_loader = GoaModelGen::SwaggerLoader.new(config.swagger_yaml)
+      path_to_types = {}
+      defined_types = {}
+      paths.each do |path|
+        types = GoaModelGen::ModelLoader.new(path).load_types
+        types.each{|t| t.assign_swagger_types(swagger_loader) }
+        types.each{|t| defined_types[t.name] = t }
+        path_to_types[path] = types
+      end
+      paths.each do |path|
+        types = path_to_types[path]
+        types.each{|t| t.assign_field_type_base(defined_types) }
+      end
+      return path_to_types
+    end
+  end
 end

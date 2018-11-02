@@ -88,24 +88,12 @@ module GoaModelGen
       end
 
       def load_types_for(paths)
-        swagger_loader = GoaModelGen::SwaggerLoader.new(cfg.swagger_yaml)
-        path_to_types = {}
-        defined_types = {}
-        paths.each do |path|
-          types = GoaModelGen::ModelLoader.new(path).load_types
-          types.each{|t| t.assign_swagger_types(swagger_loader) }
-          types.each{|t| defined_types[t.name] = t }
-          path_to_types[path] = types
-        end
-        paths.each do |path|
-          types = path_to_types[path]
-          types.each{|t| t.assign_field_type_base(defined_types) }
-        end
+        loader = GoaModelGen::Loader.new(cfg)
+        path_to_types = loader.load(paths)
         paths.each do |path|
           yield(path, path_to_types[path])
         end
       end
-
     end
 
   end
