@@ -17,10 +17,11 @@ module GoaModelGen
       @raw = YAML.load_file(path)
     end
 
-    def load_types
-      raw[types_key].map do |name, definition|
+    def load_file
+      types = raw[types_key].map do |name, definition|
         build_type(name, definition)
       end
+      SourceFile.new(path, types)
     end
 
     def build_type(name, d)
@@ -105,19 +106,17 @@ module GoaModelGen
 
     def load_types(paths)
       swagger_loader = GoaModelGen::SwaggerLoader.new(config.swagger_yaml)
-      path_to_types = {}
       defined_types = {}
-      paths.each do |path|
-        types = GoaModelGen::ModelLoader.new(path).load_types
-        types.each{|t| t.assign_swagger_types(swagger_loader) }
-        types.each{|t| defined_types[t.name] = t }
-        path_to_types[path] = types
+      files = paths.map do |path|
+        GoaModelGen::ModelLoader.new(path).load_file.tap do |f|
+          f.types.each{|t| t.assign_swagger_types(swagger_loader) }
+          f.types.each{|t| defined_types[t.name] = t }
+        end
       end
-      paths.map do |path|
-        types = path_to_types[path]
-        types.each{|t| t.assign_field_type_base(defined_types) }
-        SourceFile.new(path, types)
+      files.each do |f|
+        f.types.each{|t| t.assign_field_type_base(defined_types) }
       end
+      return files
     end
   end
 end
