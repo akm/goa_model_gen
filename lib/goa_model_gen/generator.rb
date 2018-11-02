@@ -1,4 +1,5 @@
 require "goa_model_gen"
+require "goa_model_gen/golang_helper"
 
 require "erb"
 
@@ -13,6 +14,10 @@ module GoaModelGen
 
     def initialize(config)
       @config = config
+    end
+
+    def golang_helper
+      @golang_helper ||= GolangHelper.new
     end
 
     def generate(template_path)
@@ -30,6 +35,5 @@ module GoaModelGen
         system("gofmt -w #{output_path}")
       end
     end
-
   end
 end

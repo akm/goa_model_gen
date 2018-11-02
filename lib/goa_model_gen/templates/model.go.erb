@@ -1,17 +1,15 @@
 package model
 
+<%- unless source_file.model_dependencies.empty? -%>
 import (
-  "fmt"
-  "time"
+<%- golang_helper.partition(source_file.model_dependencies).each do |group| -%>
+<%-   group.each do |path| -%>
+  "<%= path %>"
+<%-   end -%>
 
-  "golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
-
-<%- if source_file.types.any?(&:use_uuid?) -%>
-	"github.com/goadesign/goa/uuid"
 <%- end -%>
 )
+<%- end -%>
 
 <%- source_file.types.each do |type| -%>
 <%-   if !type.fields.empty? -%>
