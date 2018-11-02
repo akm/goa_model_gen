@@ -17,7 +17,7 @@ module GoaModelGen
       controller_dir
     ].freeze
 
-    attr_reader *ATTRIBUTES
+    attr_accessor *ATTRIBUTES
 
     def fulfill
       @go_package     ||= default_go_package
