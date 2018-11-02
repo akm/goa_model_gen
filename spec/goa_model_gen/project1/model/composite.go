@@ -2,13 +2,14 @@ package model
 
 import (
   "fmt"
-  "time"
 
   "golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
-	"github.com/goadesign/goa/uuid"
+  "google.golang.org/appengine/datastore"
+  "google.golang.org/appengine/log"
+
+  "github.com/goadesign/goa/uuid"
+
 )
 
 type Component1 struct {
@@ -174,4 +175,3 @@ func (s *CompositeStore) Delete(ctx context.Context, m *Composite) error {
 	}
 	return nil
 }
-

@@ -20,6 +20,11 @@ module GoaModelGen
     def use_uuid?
       false
     end
+
+    TIME_TYPE_PATTERN = /\Atime\./
+    def has_time_field?
+      fields.any?{|f| f.type =~ TIME_TYPE_PATTERN}
+    end
   end
 
   class Model < Type

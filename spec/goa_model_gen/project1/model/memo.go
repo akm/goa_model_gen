@@ -5,8 +5,9 @@ import (
   "time"
 
   "golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
+
+  "google.golang.org/appengine/datastore"
+  "google.golang.org/appengine/log"
 
 )
 
@@ -176,4 +177,3 @@ func (s *MemoStore) Delete(ctx context.Context, m *Memo) error {
 	}
 	return nil
 }
-
