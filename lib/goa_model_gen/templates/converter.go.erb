@@ -14,7 +14,7 @@ import (
 	"<%= config.go_package %>/model"
 )
 
-<%- types.select(&:gen_converter?).each do |type| -%>
+<%- source_file.types.select(&:gen_converter?).each do |type| -%>
 <%-   if type.payload -%>
 func <%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
 	model := &model.<%= type.name %>{}
