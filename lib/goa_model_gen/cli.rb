@@ -57,7 +57,7 @@ module GoaModelGen
     def converter(*paths)
       show_version_if_required
       load_types_for(paths) do |source_file|
-        generator = new_generator.tap{|g| g.types = source_file.types }
+        generator = new_generator.tap{|g| g.source_file = source_file }
         dest = File.join(cfg.controller_dir, File.basename(source_file.yaml_path, ".*") + "_conv.go")
         if source_file.types.any?{|t| !!t.payload || !!t.media_type}
           generator.run('templates/converter.go.erb', dest, overwrite: true)
