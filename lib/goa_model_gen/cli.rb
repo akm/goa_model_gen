@@ -89,7 +89,7 @@ module GoaModelGen
 
       def load_types_for(paths)
         loader = GoaModelGen::Loader.new(cfg)
-        source_files = loader.load(paths)
+        source_files = loader.load_files(paths)
         source_files.each do |source_file|
           yield(source_file)
         end

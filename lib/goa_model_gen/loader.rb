@@ -104,7 +104,7 @@ module GoaModelGen
       @config = config
     end
 
-    def load_types(paths)
+    def load_files(paths)
       swagger_loader = GoaModelGen::SwaggerLoader.new(config.swagger_yaml)
       defined_types = {}
       files = paths.map do |path|
