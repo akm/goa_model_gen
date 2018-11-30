@@ -61,6 +61,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [user])
       expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb').strip).to eq File.read(File.expand_path('../project1/model/user_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__)).strip
     end
   end
@@ -85,6 +86,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [memo])
       expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb').strip).to eq File.read(File.expand_path('../project1/model/memo_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip). to eq File.read(File.expand_path('../project1/model/memo_validation.go', __FILE__)).strip
     end
   end
@@ -103,6 +105,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1])
       expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/component1_only.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb').strip).to eq File.read(File.expand_path('../project1/model/component1_only_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/component1_only_validation.go', __FILE__)).strip
     end
   end
@@ -124,6 +127,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1, composite])
       expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/composite.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb').strip).to eq File.read(File.expand_path('../project1/model/composite_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/composite_validation.go', __FILE__)).strip
     end
   end
