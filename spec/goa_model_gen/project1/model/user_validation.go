@@ -8,4 +8,3 @@ func (m *User) Validate() error {
 	validator := validator.New()
 	return validator.Struct(m)
 }
-

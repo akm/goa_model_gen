@@ -1,15 +1,13 @@
 package model
 
 import (
-  "fmt"
+	"context"
+	"fmt"
 
-  "golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 
-  "google.golang.org/appengine/datastore"
-  "google.golang.org/appengine/log"
-
-  "github.com/goadesign/goa/uuid"
-
+	"github.com/goadesign/goa/uuid"
 )
 
 type Component1 struct {

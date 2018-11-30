@@ -1,14 +1,12 @@
 package model
 
 import (
-  "fmt"
-  "time"
+	"context"
+	"fmt"
+	"time"
 
-  "golang.org/x/net/context"
-
-  "google.golang.org/appengine/datastore"
-  "google.golang.org/appengine/log"
-
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 )
 
 type Memo struct {
