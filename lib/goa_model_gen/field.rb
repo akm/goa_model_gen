@@ -20,6 +20,7 @@ module GoaModelGen
       @required = attrs['required']
       @default = attrs['default']
       @validation = attrs['validation']
+      @goa_name = attrs['goa_name']
       @datastore_tag = attrs['datastore_tag']
     end
 
@@ -27,7 +28,7 @@ module GoaModelGen
     PRIMITIVE_TYPES = %w[bool int int64 float string time.Time uuid.UUID *datastore.Key]
 
     def goa_name
-      Goa.capitalize_join(name.split("_"))
+      @goa_name.presence || Goa.capitalize_join(name.split("_"))
     end
 
     def primitive?
