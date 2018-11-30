@@ -7,15 +7,14 @@ def method_calling_exp(m, argument)
   end
 end
 -%>
-package controller
-
-import (
-	"<%= config.go_package %>/app"
-	"<%= config.go_package %>/model"
-)
+<%- package 'controller' -%>
 
 <%- source_file.types.select(&:gen_converter?).each do |type| -%>
 <%-   if type.payload -%>
+<%-
+        import "#{config.go_package}/app"
+        import "#{config.go_package}/model"
+-%>
 func <%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
 	model := &model.<%= type.name %>{}
 	if err := CopyFrom<%= type.name %>PayloadToModel(payload, model); err != nil {

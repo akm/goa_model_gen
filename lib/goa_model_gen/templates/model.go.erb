@@ -1,22 +1,13 @@
-package model
-
-<%- unless source_file.model_dependencies.empty? -%>
-import (
-<%- golang_helper.partition(source_file.model_dependencies).each do |group| -%>
-<%-   group.each do |path| -%>
-  "<%= path %>"
-<%-   end -%>
-
-<%- end -%>
-)
-<%- end -%>
+<%- package "model" -%>
 
 <%- source_file.types.each do |type| -%>
 <%-   if !type.fields.empty? -%>
+<%-     import "time" if type.has_time_field? -%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
 	<%= type.id_definition %>
 <%-       if type.parent -%>
+<%-         import "google.golang.org/appengine/datastore" -%>
 	ParentKey *datastore.Key `datastore:"-" goon:"parent" json:"-"`
 <%-       end -%>
 <%-     end -%>
@@ -61,6 +52,7 @@ func (m *<%= model.name %>) PrepareToUpdate() error {
 }
 
 <%-   if model.parent -%>
+<%-     import "context" -%>
 func (m *<%= model.name %>) Parent(ctx context.Context) (*<%= model.parent %>, error) {
   parentStore := &<%= model.parent %>Store{}
 	return parentStore.ByKey(ctx, m.ParentKey)
@@ -70,7 +62,15 @@ func (m *<%= model.name %>) Parent(ctx context.Context) (*<%= model.parent %>, e
 <%- end -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
-<%- store_name = "#{model.name}Store" -%>
+<%-   store_name = "#{model.name}Store" -%>
+<%-
+      import(
+        "context",
+        "fmt",
+        "google.golang.org/appengine/datastore",
+        "google.golang.org/appengine/log",
+      )
+-%>
 type <%= store_name %> struct{
 <%- if model.parent -%>
 	ParentKey *datastore.Key
@@ -231,6 +231,7 @@ func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
 <%- if model.goon['id_type'] == 'UUID' -%>
+<%-   import "github.com/goadesign/goa/uuid" -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
 	}
