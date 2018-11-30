@@ -1,0 +1,9 @@
+package <%= package %>
+
+<%- unless dependencies.empty? -%>
+import (
+<%= golang_helper.partition(dependencies).map{|group| group.map{|path| "\t\"#{path}\"" }.join("\n") }.join("\n\n") %>
+)
+<%- end -%>
+
+<%= body %>
