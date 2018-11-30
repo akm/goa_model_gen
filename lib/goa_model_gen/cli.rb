@@ -47,7 +47,7 @@ module GoaModelGen
           {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
           {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
         ].each do |d|
-          dest = File.join(cfg.model_dir, File.basename(source_file.path, ".*") + d[:suffix])
+          dest = File.join(cfg.model_dir, File.basename(source_file.yaml_path, ".*") + d[:suffix])
           generator.run(d[:path], dest, overwrite: d[:overwrite])
         end
       end
