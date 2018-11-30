@@ -25,6 +25,10 @@ module GoaModelGen
     def has_time_field?
       fields.any?{|f| f.type =~ TIME_TYPE_PATTERN}
     end
+
+    def field_type_packages
+      fields.map(&:type_package).compact.uniq.sort
+    end
   end
 
   class Model < Type

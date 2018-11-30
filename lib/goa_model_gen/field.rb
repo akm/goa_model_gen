@@ -66,6 +66,10 @@ module GoaModelGen
       "#{ name } #{ type } `#{ tag }`"
     end
 
+    def type_package
+      type.include?('.') ? type.split('.', 2).first.sub(/\A\*/, '') : nil
+    end
+
     # https://swagger.io/docs/specification/data-models/data-types/
     # https://tour.golang.org/basics/11
     # https://golang.org/pkg/go/types/#pkg-variables
