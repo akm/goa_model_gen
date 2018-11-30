@@ -44,6 +44,10 @@ module GoaModelGen
 
     GO_BASE_PATH = File.expand_path('../templates/base.go.erb', __FILE__)
 
+    PACKAGE_FOR_IMPORT = {
+      "datastore" => "google.golang.org/appengine/datastore",
+    }
+
     def generate(template_path)
       clear_dependencies
 

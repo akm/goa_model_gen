@@ -2,7 +2,11 @@
 
 <%- source_file.types.each do |type| -%>
 <%-   if !type.fields.empty? -%>
-<%-     import "time" if type.has_time_field? -%>
+<%-
+        type.field_type_packages.each do |pkg|
+          import(PACKAGE_FOR_IMPORT[pkg] || pkg)
+        end
+-%>
 type <%= type.name %> struct {
 <%-     if type.goon -%>
 	<%= type.id_definition %>
