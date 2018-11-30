@@ -22,7 +22,9 @@ types:
       AuthDomain: string
       Admin: bool
       # ID:  string
-      ClientID: string
+      ClientId:
+        type: string
+        goa_name: ClientID
       FederatedIdentity: string
       FederatedProvider: string
       CreatedAt: *time_required

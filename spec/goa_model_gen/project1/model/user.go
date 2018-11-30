@@ -9,7 +9,7 @@ type User struct {
 	Email string `json:"email,omitempty" validate:"email"`
 	AuthDomain string `json:"auth_domain,omitempty"`
 	Admin bool `json:"admin,omitempty"`
-	ClientID string `json:"client_id,omitempty"`
+	ClientId string `json:"client_id,omitempty"`
 	FederatedIdentity string `json:"federated_identity,omitempty"`
 	FederatedProvider string `json:"federated_provider,omitempty"`
 	CreatedAt time.Time `json:"created_at" validate:"required"`

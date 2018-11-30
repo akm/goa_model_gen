@@ -43,7 +43,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email,omitempty" validate:"email"`'}
     it{ expect(subject.field_by('AuthDomain').definition).to eq 'AuthDomain string `json:"auth_domain,omitempty"`'}
     it{ expect(subject.field_by('Admin').definition).to eq 'Admin bool `json:"admin,omitempty"`'}
-    it{ expect(subject.field_by('ClientID').definition).to eq 'ClientID string `json:"client_id,omitempty"`'}
+    it{ expect(subject.field_by('ClientId').definition).to eq 'ClientId string `json:"client_id,omitempty"`'}
     it{ expect(subject.field_by('FederatedIdentity').definition).to eq 'FederatedIdentity string `json:"federated_identity,omitempty"`'}
     it{ expect(subject.field_by('FederatedProvider').definition).to eq 'FederatedProvider string `json:"federated_provider,omitempty"`'}
     it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
