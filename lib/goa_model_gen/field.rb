@@ -9,6 +9,7 @@ module GoaModelGen
     attr_reader :name, :type, :default
     attr_accessor :format # for swagger. See https://swagger.io/docs/specification/data-models/data-types/
     attr_accessor :required
+    attr_accessor :validation
     attr_reader :type_obj
     attr_reader :datastore_tag
 
@@ -18,6 +19,7 @@ module GoaModelGen
       @format = attrs['format']
       @required = attrs['required']
       @default = attrs['default']
+      @validation = attrs['validation']
       @datastore_tag = attrs['datastore_tag']
     end
 
@@ -54,10 +56,11 @@ module GoaModelGen
     def tag
       json_tag = name.underscore.dup
       json_tag << ',omitempty' if nullable?
-      validate_tag = 'required' unless nullable?
+      validate_tags = [validation].compact
+      validate_tags << 'required' unless nullable?
       [
         ['json', json_tag],
-        ['validate', validate_tag],
+        ['validate', validate_tags.join(',').presence],
         ['datastore', datastore_tag],
       ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
     end
