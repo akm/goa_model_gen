@@ -9,7 +9,7 @@ import (
 type Memo struct {
 	Id int64 `datastore:"-" goon:"id" json:"id"`
 	AuthorKey *datastore.Key `json:"author_key" validate:"required"`
-	Content string `json:"content,omitempty"`
+	ContentText string `json:"content_text,omitempty"`
 	Shared bool `json:"shared,omitempty"`
 	CreatedAt time.Time `json:"created_at" validate:"required"`
 	UpdatedAt time.Time `json:"updated_at" validate:"required"`

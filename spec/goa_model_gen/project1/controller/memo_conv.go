@@ -23,7 +23,7 @@ func CopyFromMemoPayloadToModel(payload *app.MemoPayload, model *model.Memo) err
 
   // Id not found in payload fields
   // AuthorKey not found in payload fields
-  model.Content = payload.Content
+  model.ContentText = payload.Content
   model.Shared = BoolPointerToBool(payload.Shared)
   // CreatedAt not found in payload fields
   // UpdatedAt not found in payload fields
@@ -39,7 +39,7 @@ func MemoModelToMediaType(model *model.Memo) (*app.Memo, error) {
 
   r.ID = Int64ToString(model.Id)
   // AuthorKey not found for media type field
-  r.Content = model.Content
+  r.Content = model.ContentText
   r.Shared = model.Shared
   r.CreatedAt = model.CreatedAt
   r.UpdatedAt = model.UpdatedAt

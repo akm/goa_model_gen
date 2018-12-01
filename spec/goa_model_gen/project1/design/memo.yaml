@@ -18,7 +18,9 @@ types:
       AuthorKey:
         type: "*datastore.Key"
         required: true
-      Content: string
+      ContentText:
+        type: string
+        swagger_name: content
       Shared: bool
       CreatedAt: *time_required
       UpdatedAt: *time_required

@@ -83,7 +83,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.use_uuid?).to be_falsy }
 
     it{ expect(subject.field_by('AuthorKey').definition).to eq 'AuthorKey *datastore.Key `json:"author_key" validate:"required"`'}
-    it{ expect(subject.field_by('Content').definition).to eq 'Content string `json:"content,omitempty"`'}
+    it{ expect(subject.field_by('ContentText').definition).to eq 'ContentText string `json:"content_text,omitempty"`'}
     it{ expect(subject.field_by('Shared').definition).to eq 'Shared bool `json:"shared,omitempty"`'}
     it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
     it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
