@@ -40,7 +40,7 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_definition).to eq 'ID string `datastore:"-" goon:"id" json:"id"`' }
     it{ expect(subject.use_uuid?).to be_falsy }
 
-    it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email,omitempty" validate:"email"`'}
+    it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email" validate:"required,email"`'}
     it{ expect(subject.field_by('AuthDomain').definition).to eq 'AuthDomain string `json:"auth_domain,omitempty"`'}
     it{ expect(subject.field_by('Admin').definition).to eq 'Admin bool `json:"admin,omitempty"`'}
     it{ expect(subject.field_by('ClientId').definition).to eq 'ClientId string `json:"client_id,omitempty"`'}

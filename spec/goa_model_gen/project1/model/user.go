@@ -6,7 +6,7 @@ import (
 
 type User struct {
 	ID string `datastore:"-" goon:"id" json:"id"`
-	Email string `json:"email,omitempty" validate:"email"`
+	Email string `json:"email" validate:"required,email"`
 	AuthDomain string `json:"auth_domain,omitempty"`
 	Admin bool `json:"admin,omitempty"`
 	ClientId string `json:"client_id,omitempty"`

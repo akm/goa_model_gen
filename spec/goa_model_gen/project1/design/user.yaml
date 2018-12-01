@@ -18,6 +18,7 @@ types:
       # See https://godoc.org/google.golang.org/appengine/user#User
       Email:
         type: string
+        required: true
         validation: email
       AuthDomain: string
       Admin: bool
