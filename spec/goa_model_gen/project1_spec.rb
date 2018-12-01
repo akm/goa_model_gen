@@ -64,6 +64,11 @@ RSpec.describe GoaModelGen::Type do
       expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/user_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__)).strip
     end
+
+    it :generate_converter do
+      generator.source_file = GoaModelGen::SourceFile.new('', [user])
+      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/user_conv.go', __FILE__)).strip
+    end
   end
 
   context :memo do
@@ -88,6 +93,11 @@ RSpec.describe GoaModelGen::Type do
       expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__)).strip
       expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/memo_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip). to eq File.read(File.expand_path('../project1/model/memo_validation.go', __FILE__)).strip
+    end
+
+    it :generate_converter do
+      generator.source_file = GoaModelGen::SourceFile.new('', [memo])
+      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/memo_conv.go', __FILE__)).strip
     end
   end
 
