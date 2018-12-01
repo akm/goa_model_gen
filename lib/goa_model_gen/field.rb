@@ -63,8 +63,9 @@ module GoaModelGen
     def tag
       json_tag = name.underscore.dup
       json_tag << ',omitempty' if nullable?
-      validate_tags = [validation].compact
-      validate_tags << 'required' unless nullable?
+      validate_tags = nullable? ? [] : ['required']
+      validate_tags << validation.presence
+      validate_tags.compact!
       [
         ['json', json_tag],
         ['validate', validate_tags.join(',').presence],
