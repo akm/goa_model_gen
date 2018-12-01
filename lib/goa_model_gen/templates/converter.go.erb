@@ -44,9 +44,9 @@ func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %
 <%-     if simple -%>
   model.<%= f.name %> = payload.<%= f.goa_name %>
 <%-     elsif !with_error -%>
-  model.<%= f.name %> = <%= method_calling_exp(method_name, "payload.#{f.name}") %>
+  model.<%= f.name %> = <%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>
 <%-     else -%>
-  if v, err := <%= method_calling_exp(method_name, "payload.#{f.name}") %>; err != nil {
+  if v, err := <%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>; err != nil {
     return err
   } else {
     model.<%= f.name %> = v
@@ -79,14 +79,14 @@ func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= t
           simple, with_error, method_name = f.media_type_assignment_options(mf)
 -%>
 <%-       if simple -%>
-  r.<%= mf.goa_name %> = model.<%= f.name %>
+  r.<%= f.goa_name %> = model.<%= f.name %>
 <%-       elsif !with_error -%>
-  r.<%= mf.goa_name %> = <%= method_calling_exp(method_name, "model.#{f.name}") %>
+  r.<%= f.goa_name %> = <%= method_calling_exp(method_name, "model.#{f.name}") %>
 <%-       else -%>
   if val, err := <%= method_calling_exp(method_name, "model.#{f.name}") %>; err != nil {
      return nil, err
   } else {
-    r.<%= mf.goa_name %> = val
+    r.<%= f.goa_name %> = val
   }
 <%-       end
         end -%>
