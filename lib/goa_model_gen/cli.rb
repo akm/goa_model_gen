@@ -13,13 +13,13 @@ module GoaModelGen
 
     desc "config", "Generate config file"
     def config(path = './goa_model_gen.yaml')
-      show_version_if_required
+      setup
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
     end
 
     desc "bootstrap", "Generate files not concerned with model"
     def bootstrap
-      show_version_if_required
+      setup
       generator = new_generator
       {
         "templates/goon.go.erb" => "model/goon.go",
@@ -31,7 +31,7 @@ module GoaModelGen
 
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
-      show_version_if_required
+      setup
       load_types_for(paths) do |source_file|
         puts "types in #{source_file.yaml_path}"
         puts YAML.dump(source_file.types)
@@ -40,7 +40,7 @@ module GoaModelGen
 
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
-      show_version_if_required
+      setup
       load_types_for(paths) do |source_file|
         generator = new_generator.tap{|g| g.source_file = source_file }
         [
@@ -55,7 +55,7 @@ module GoaModelGen
 
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
-      show_version_if_required
+      setup
       load_types_for(paths) do |source_file|
         generator = new_generator.tap{|g| g.source_file = source_file }
         dest = File.join(cfg.controller_dir, File.basename(source_file.yaml_path, ".*") + "_conv.go")
@@ -71,7 +71,7 @@ module GoaModelGen
     end
 
     no_commands do
-      def show_version_if_required
+      def setup
         show_version if options[:version]
       end
 
