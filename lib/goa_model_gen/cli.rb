@@ -2,6 +2,7 @@ require "goa_model_gen"
 
 require "thor"
 
+require "goa_model_gen/logger"
 require "goa_model_gen/config"
 require "goa_model_gen/loader"
 require "goa_model_gen/generator"
@@ -9,6 +10,7 @@ require "goa_model_gen/generator"
 module GoaModelGen
   class Cli < Thor
     class_option :version, type: :boolean, aliases: 'v', desc: 'Show version before processing'
+    class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
     class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
     desc "config", "Generate config file"
@@ -73,6 +75,7 @@ module GoaModelGen
     no_commands do
       def setup
         show_version if options[:version]
+        GoaModelGen::Logger.setup(options[:log_level] || 'info')
       end
 
       def show_version

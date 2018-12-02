@@ -97,7 +97,7 @@ module GoaModelGen
     end
 
     def assign_swagger_types(loader)
-      $stderr.puts "assign_swagger_types for #{name.inspect}"
+      GoaModelGen.logger.debug "assign_swagger_types for #{name.inspect}"
       # Original Type: VmDisk
       # Swagger type : VmDisk
       # Goa struct   : VMDisk
