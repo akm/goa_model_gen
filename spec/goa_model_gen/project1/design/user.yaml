@@ -16,11 +16,16 @@ types:
       id_type: string
     fields:
       # See https://godoc.org/google.golang.org/appengine/user#User
-      Email: string
+      Email:
+        type: string
+        required: true
+        validation: email
       AuthDomain: string
       Admin: bool
       # ID:  string
-      ClientID: string
+      ClientId:
+        type: string
+        goa_name: ClientID
       FederatedIdentity: string
       FederatedProvider: string
       CreatedAt: *time_required

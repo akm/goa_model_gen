@@ -2,6 +2,7 @@ require "goa_model_gen"
 
 require "yaml"
 
+require "goa_model_gen/logger"
 require "goa_model_gen/type"
 require "goa_model_gen/field"
 require "goa_model_gen/source_file"
@@ -72,7 +73,7 @@ module GoaModelGen
     def load(name)
       d = lookup(name)
       unless d
-        $stderr.puts("WARNING #{name} not found in #{path}")
+        GoaModelGen.logger.info("#{name} not found in #{path}")
         return nil
       end
       build_type(name, d)

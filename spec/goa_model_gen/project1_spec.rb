@@ -40,10 +40,10 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.id_definition).to eq 'ID string `datastore:"-" goon:"id" json:"id"`' }
     it{ expect(subject.use_uuid?).to be_falsy }
 
-    it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email,omitempty"`'}
+    it{ expect(subject.field_by('Email').definition).to eq 'Email string `json:"email" validate:"required,email"`'}
     it{ expect(subject.field_by('AuthDomain').definition).to eq 'AuthDomain string `json:"auth_domain,omitempty"`'}
     it{ expect(subject.field_by('Admin').definition).to eq 'Admin bool `json:"admin,omitempty"`'}
-    it{ expect(subject.field_by('ClientID').definition).to eq 'ClientID string `json:"client_id,omitempty"`'}
+    it{ expect(subject.field_by('ClientId').definition).to eq 'ClientId string `json:"client_id,omitempty"`'}
     it{ expect(subject.field_by('FederatedIdentity').definition).to eq 'FederatedIdentity string `json:"federated_identity,omitempty"`'}
     it{ expect(subject.field_by('FederatedProvider').definition).to eq 'FederatedProvider string `json:"federated_provider,omitempty"`'}
     it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
@@ -60,8 +60,14 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [user])
-      expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/user_store.go', __FILE__)).strip
+      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__)).strip
+    end
+
+    it :generate_converter do
+      generator.source_file = GoaModelGen::SourceFile.new('', [user])
+      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/user_conv.go', __FILE__)).strip
     end
   end
 
@@ -77,15 +83,21 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.use_uuid?).to be_falsy }
 
     it{ expect(subject.field_by('AuthorKey').definition).to eq 'AuthorKey *datastore.Key `json:"author_key" validate:"required"`'}
-    it{ expect(subject.field_by('Content').definition).to eq 'Content string `json:"content,omitempty"`'}
+    it{ expect(subject.field_by('ContentText').definition).to eq 'ContentText string `json:"content_text,omitempty"`'}
     it{ expect(subject.field_by('Shared').definition).to eq 'Shared bool `json:"shared,omitempty"`'}
     it{ expect(subject.field_by('CreatedAt').definition).to eq 'CreatedAt time.Time `json:"created_at" validate:"required"`'}
     it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [memo])
-      expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/memo_store.go', __FILE__)).strip
       expect(generator.generate('templates/model_validation.go.erb').strip). to eq File.read(File.expand_path('../project1/model/memo_validation.go', __FILE__)).strip
+    end
+
+    it :generate_converter do
+      generator.source_file = GoaModelGen::SourceFile.new('', [memo])
+      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/memo_conv.go', __FILE__)).strip
     end
   end
 
@@ -102,8 +114,9 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1])
-      expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/component1_only.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/component1_only_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only_store.go', __FILE__)).strip
+      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only_validation.go', __FILE__)).strip
     end
   end
 
@@ -123,8 +136,9 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1, composite])
-      expect(generator.generate('templates/model.go.erb').strip).to eq File.read(File.expand_path('../project1/model/composite.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb').strip).to eq File.read(File.expand_path('../project1/model/composite_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/composite.go', __FILE__)).strip
+      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/composite_store.go', __FILE__)).strip
+      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/composite_validation.go', __FILE__)).strip
     end
   end
 

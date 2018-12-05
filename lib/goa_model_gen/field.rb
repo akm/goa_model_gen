@@ -9,6 +9,8 @@ module GoaModelGen
     attr_reader :name, :type, :default
     attr_accessor :format # for swagger. See https://swagger.io/docs/specification/data-models/data-types/
     attr_accessor :required
+    attr_accessor :validation
+    attr_accessor :swagger_name
     attr_reader :type_obj
     attr_reader :datastore_tag
 
@@ -18,6 +20,9 @@ module GoaModelGen
       @format = attrs['format']
       @required = attrs['required']
       @default = attrs['default']
+      @validation = attrs['validation']
+      @goa_name = attrs['goa_name']
+      @swagger_name = attrs['swagger_name']
       @datastore_tag = attrs['datastore_tag']
     end
 
@@ -25,7 +30,11 @@ module GoaModelGen
     PRIMITIVE_TYPES = %w[bool int int64 float string time.Time uuid.UUID *datastore.Key]
 
     def goa_name
-      Goa.capitalize_join(name.split("_"))
+      @goa_name.presence || Goa.capitalize_join(swagger_name.split("_"))
+    end
+
+    def swagger_name
+      @swagger_name.presence ||name.underscore
     end
 
     def primitive?
@@ -54,16 +63,22 @@ module GoaModelGen
     def tag
       json_tag = name.underscore.dup
       json_tag << ',omitempty' if nullable?
-      validate_tag = 'required' unless nullable?
+      validate_tags = nullable? ? [] : ['required']
+      validate_tags << validation.presence
+      validate_tags.compact!
       [
         ['json', json_tag],
-        ['validate', validate_tag],
+        ['validate', validate_tags.join(',').presence],
         ['datastore', datastore_tag],
       ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
     end
 
     def definition
       "#{ name } #{ type } `#{ tag }`"
+    end
+
+    def type_package
+      type.include?('.') ? type.split('.', 2).first.sub(/\A\*/, '') : nil
     end
 
     # https://swagger.io/docs/specification/data-models/data-types/

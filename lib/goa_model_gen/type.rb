@@ -25,6 +25,10 @@ module GoaModelGen
     def has_time_field?
       fields.any?{|f| f.type =~ TIME_TYPE_PATTERN}
     end
+
+    def field_type_packages
+      fields.map(&:type_package).compact.uniq.sort
+    end
   end
 
   class Model < Type
@@ -93,7 +97,7 @@ module GoaModelGen
     end
 
     def assign_swagger_types(loader)
-      $stderr.puts "assign_swagger_types for #{name.inspect}"
+      GoaModelGen.logger.debug "assign_swagger_types for #{name.inspect}"
       # Original Type: VmDisk
       # Swagger type : VmDisk
       # Goa struct   : VMDisk

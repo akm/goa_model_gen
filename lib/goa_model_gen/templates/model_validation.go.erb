@@ -1,10 +1,7 @@
-package model
-
-import (
-	"gopkg.in/go-playground/validator.v9"
-)
+<%- package "model" -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
+<%-   import "gopkg.in/go-playground/validator.v9" -%>
 func (m *<%= model.name %>) Validate() error {
 	validator := validator.New()
 	return validator.Struct(m)

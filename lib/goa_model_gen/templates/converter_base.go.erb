@@ -1,11 +1,12 @@
-package controller
+<%- package 'controller' -%>
 
-import (
-  "fmt"
-	"strconv"
-
-	"google.golang.org/appengine/datastore"
-)
+<%-
+  import(
+    "fmt",
+    "strconv",
+    "google.golang.org/appengine/datastore",
+  )
+-%>
 
 var NoModelGiven = fmt.Errorf("No model given")
 var NoPayloadGiven = fmt.Errorf("No payload given")
