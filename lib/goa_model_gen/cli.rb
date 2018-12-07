@@ -31,13 +31,11 @@ module GoaModelGen
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
       setup
-      generator = new_generator
-      generator.process({
+      new_generator.process({
         "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
       })
       load_types_for(paths) do |source_file|
-        generator = new_generator.tap{|g| g.source_file = source_file }
-        generator.process({
+        new_generator.tap{|g| g.source_file = source_file }.process({
           'templates/model.go.erb' => dest_path(cfg.model_dir, source_file, '.go'),
           'templates/model_store.go.erb' => dest_path(cfg.model_dir, source_file, '_store.go'),
           'templates/model_validation.go.erb' => dest_path(cfg.model_dir, source_file, '_validation.go'),
@@ -48,14 +46,12 @@ module GoaModelGen
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
       setup
-      generator = new_generator
-      generator.process({
+      new_generator.process({
         "templates/converter_base.go.erb" => File.join(cfg.controller_dir, "converter_base.go"),
       })
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
-        generator = new_generator.tap{|g| g.source_file = source_file }
-        generator.process({
+        new_generator.tap{|g| g.source_file = source_file }.process({
           'templates/converter.go.erb' => dest_path(cfg.controller_dir, source_file, "_conv.go"),
         })
       end
