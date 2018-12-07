@@ -49,7 +49,7 @@ func (s *UserStore) Query(ctx context.Context) *datastore.Query {
 
 func (s *UserStore) ByID(ctx context.Context, iD string) (*User, error) {
 	r := User{ID: iD}
-  err := s.Get(ctx, &r)
+	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -112,45 +112,52 @@ func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
 }
 
 func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error) {
-  err := m.PrepareToCreate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
-		return nil, err
-	}
-
-	exist, err := s.Exist(ctx, m)
+	err := m.PrepareToCreate()
 	if err != nil {
 		return nil, err
 	}
-	if exist {
-		log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
-		return nil, fmt.Errorf("Duplicate ID error: %q of %v\n", m.ID, m)
-	}
-
-  return s.Put(ctx, m)
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if exist {
+			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
+			return fmt.Errorf("Duplicate ID error: %q of %v\n", m.ID, m)
+		}
+		return nil
+	})
 }
 
 func (s *UserStore) Update(ctx context.Context, m *User) (*datastore.Key, error) {
-  err := m.PrepareToUpdate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
-		return nil, err
-	}
-
-	exist, err := s.Exist(ctx, m)
+	err := m.PrepareToUpdate()
 	if err != nil {
 		return nil, err
 	}
-	if !exist {
-		log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
-		return nil, fmt.Errorf("No data to update %q of %v\n", m.ID, m)
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
+			return fmt.Errorf("No data to update %q of %v\n", m.ID, m)
+		}
+		return nil
+	})
+}
+
+func (s *UserStore) PutWith(ctx context.Context, m *User, f func() error) (*datastore.Key, error) {
+	if err := s.Validate(ctx, m); err != nil {
+		return nil, err
+	}
+	if f != nil {
+		if err := f(); err != nil {
+			return nil, err
+		}
 	}
 
-  return s.Put(ctx, m)
+	return s.Put(ctx, m)
 }
 
 func (s *UserStore) Put(ctx context.Context, m *User) (*datastore.Key, error) {
@@ -177,7 +184,7 @@ func (s *UserStore) Delete(ctx context.Context, m *User) error {
 	return nil
 }
 
-func (s *UserStore) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+func (s *UserStore) ValidateUniqueness(ctx context.Context, m *User) error {
 	conditions := map[string]interface{}{
 		"Email": m.Email,
 	}

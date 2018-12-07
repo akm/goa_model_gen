@@ -51,7 +51,7 @@ func (s *CompositeStore) Query(ctx context.Context) *datastore.Query {
 
 func (s *CompositeStore) ByID(ctx context.Context, id string) (*Composite, error) {
 	r := Composite{Id: id}
-  err := s.Get(ctx, &r)
+	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -114,29 +114,52 @@ func (s *CompositeStore) Exist(ctx context.Context, m *Composite) (bool, error) 
 }
 
 func (s *CompositeStore) Create(ctx context.Context, m *Composite) (*datastore.Key, error) {
-  err := m.PrepareToCreate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
+	err := m.PrepareToCreate()
+	if err != nil {
 		return nil, err
 	}
-
-
-  return s.Put(ctx, m)
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if exist {
+			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
+			return fmt.Errorf("Duplicate  error: %q of %v\n", m., m)
+		}
+		return nil
+	})
 }
 
 func (s *CompositeStore) Update(ctx context.Context, m *Composite) (*datastore.Key, error) {
-  err := m.PrepareToUpdate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
+	err := m.PrepareToUpdate()
+	if err != nil {
 		return nil, err
 	}
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
+			return fmt.Errorf("No data to update %q of %v\n", m., m)
+		}
+		return nil
+	})
+}
 
+func (s *CompositeStore) PutWith(ctx context.Context, m *Composite, f func() error) (*datastore.Key, error) {
+	if err := s.Validate(ctx, m); err != nil {
+		return nil, err
+	}
+	if f != nil {
+		if err := f(); err != nil {
+			return nil, err
+		}
+	}
 
-  return s.Put(ctx, m)
+	return s.Put(ctx, m)
 }
 
 func (s *CompositeStore) Put(ctx context.Context, m *Composite) (*datastore.Key, error) {
@@ -166,7 +189,7 @@ func (s *CompositeStore) Delete(ctx context.Context, m *Composite) error {
 	return nil
 }
 
-func (s *CompositeStore) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+func (s *CompositeStore) ValidateUniqueness(ctx context.Context, m *Composite) error {
 	conditions := map[string]interface{}{
 	}
 	for field, value := range conditions {

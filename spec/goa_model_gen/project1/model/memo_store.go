@@ -49,7 +49,7 @@ func (s *MemoStore) Query(ctx context.Context) *datastore.Query {
 
 func (s *MemoStore) ByID(ctx context.Context, id int64) (*Memo, error) {
 	r := Memo{Id: id}
-  err := s.Get(ctx, &r)
+	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -112,29 +112,52 @@ func (s *MemoStore) Exist(ctx context.Context, m *Memo) (bool, error) {
 }
 
 func (s *MemoStore) Create(ctx context.Context, m *Memo) (*datastore.Key, error) {
-  err := m.PrepareToCreate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
+	err := m.PrepareToCreate()
+	if err != nil {
 		return nil, err
 	}
-
-
-  return s.Put(ctx, m)
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if exist {
+			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
+			return fmt.Errorf("Duplicate  error: %q of %v\n", m., m)
+		}
+		return nil
+	})
 }
 
 func (s *MemoStore) Update(ctx context.Context, m *Memo) (*datastore.Key, error) {
-  err := m.PrepareToUpdate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
+	err := m.PrepareToUpdate()
+	if err != nil {
 		return nil, err
 	}
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
+			return fmt.Errorf("No data to update %q of %v\n", m., m)
+		}
+		return nil
+	})
+}
 
+func (s *MemoStore) PutWith(ctx context.Context, m *Memo, f func() error) (*datastore.Key, error) {
+	if err := s.Validate(ctx, m); err != nil {
+		return nil, err
+	}
+	if f != nil {
+		if err := f(); err != nil {
+			return nil, err
+		}
+	}
 
-  return s.Put(ctx, m)
+	return s.Put(ctx, m)
 }
 
 func (s *MemoStore) Put(ctx context.Context, m *Memo) (*datastore.Key, error) {
@@ -161,7 +184,7 @@ func (s *MemoStore) Delete(ctx context.Context, m *Memo) error {
 	return nil
 }
 
-func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *Memo) error {
 	conditions := map[string]interface{}{
 	}
 	for field, value := range conditions {

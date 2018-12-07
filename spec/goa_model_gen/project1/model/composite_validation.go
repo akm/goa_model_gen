@@ -9,7 +9,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-func (s *CompositeStore) Validate(ctx context.Context, m *Tenant) error {
+func (s *CompositeStore) Validate(ctx context.Context, m *Composite) error {
 	if err := m.Validate(ctx); err != nil {
 		return err
 	}
