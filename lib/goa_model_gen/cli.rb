@@ -19,16 +19,6 @@ module GoaModelGen
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
     end
 
-    desc "bootstrap", "Generate files not concerned with model"
-    def bootstrap
-      setup
-      generator = new_generator
-      generator.process({
-        "templates/goon.go.erb" => "model/goon.go",
-        "templates/converter_base.go.erb" => "controller/converter_base.go",
-      })
-    end
-
     desc "show FILE1...", "Show model info from definition files"
     def show(*paths)
       setup
@@ -41,6 +31,10 @@ module GoaModelGen
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
       setup
+      generator = new_generator
+      generator.process({
+        "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
+      })
       load_types_for(paths) do |source_file|
         generator = new_generator.tap{|g| g.source_file = source_file }
         generator.process({
@@ -54,6 +48,10 @@ module GoaModelGen
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
       setup
+      generator = new_generator
+      generator.process({
+        "templates/converter_base.go.erb" => File.join(cfg.controller_dir, "converter_base.go"),
+      })
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
         generator = new_generator.tap{|g| g.source_file = source_file }
