@@ -10,6 +10,8 @@ require "goa_model_gen/generator"
 module GoaModelGen
   class Cli < Thor
     class_option :version, type: :boolean, aliases: 'v', desc: 'Show version before processing'
+    class_option :dryrun, type: :boolean, aliases: 'd', desc: "Don't write or overwrite file"
+    class_option :force, type: :boolean, aliases: 'f', desc: 'Force overwrite files'
     class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
     class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
@@ -78,7 +80,10 @@ module GoaModelGen
       end
 
       def new_generator
-        GoaModelGen::Generator.new(cfg)
+        GoaModelGen::Generator.new(cfg).tap do |g|
+          g.force = options[:force]
+          g.dryrun = options[:dryrun]
+        end
       end
 
       def load_types_for(paths)
