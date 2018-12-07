@@ -10,6 +10,8 @@ require "goa_model_gen/generator"
 module GoaModelGen
   class Cli < Thor
     class_option :version, type: :boolean, aliases: 'v', desc: 'Show version before processing'
+    class_option :dryrun, type: :boolean, aliases: 'd', desc: "Don't write or overwrite file"
+    class_option :force, type: :boolean, aliases: 'f', desc: 'Force overwrite files'
     class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
     class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
@@ -17,18 +19,6 @@ module GoaModelGen
     def config(path = './goa_model_gen.yaml')
       setup
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
-    end
-
-    desc "bootstrap", "Generate files not concerned with model"
-    def bootstrap
-      setup
-      generator = new_generator
-      {
-        "templates/goon.go.erb" => "model/goon.go",
-        "templates/converter_base.go.erb" => "controller/converter_base.go",
-      }.each do |template, dest|
-        generator.run(template, dest, overwrite: true)
-      end
     end
 
     desc "show FILE1...", "Show model info from definition files"
@@ -43,27 +33,30 @@ module GoaModelGen
     desc "model FILE1...", "Generate model files from definition files"
     def model(*paths)
       setup
+      new_generator.process({
+        "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
+        'templates/validator.go.erb' => File.join(cfg.model_dir, 'validator.go'),
+      })
       load_types_for(paths) do |source_file|
-        generator = new_generator.tap{|g| g.source_file = source_file }
-        [
-          {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
-          {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
-        ].each do |d|
-          dest = File.join(cfg.model_dir, File.basename(source_file.yaml_path, ".*") + d[:suffix])
-          generator.run(d[:path], dest, overwrite: d[:overwrite])
-        end
+        new_generator.tap{|g| g.source_file = source_file }.process({
+          'templates/model.go.erb' => dest_path(cfg.model_dir, source_file, '.go'),
+          'templates/model_store.go.erb' => dest_path(cfg.model_dir, source_file, '_store.go'),
+          'templates/model_validation.go.erb' => dest_path(cfg.model_dir, source_file, '_validation.go'),
+        })
       end
     end
 
     desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
     def converter(*paths)
       setup
+      new_generator.process({
+        "templates/converter_base.go.erb" => File.join(cfg.controller_dir, "converter_base.go"),
+      })
       load_types_for(paths) do |source_file|
-        generator = new_generator.tap{|g| g.source_file = source_file }
-        dest = File.join(cfg.controller_dir, File.basename(source_file.yaml_path, ".*") + "_conv.go")
-        if source_file.types.any?{|t| !!t.payload || !!t.media_type}
-          generator.run('templates/converter.go.erb', dest, overwrite: true)
-        end
+        next if source_file.types.all?{|t| !t.payload && !t.media_type}
+        new_generator.tap{|g| g.source_file = source_file }.process({
+          'templates/converter.go.erb' => dest_path(cfg.controller_dir, source_file, "_conv.go"),
+        })
       end
     end
 
@@ -87,7 +80,10 @@ module GoaModelGen
       end
 
       def new_generator
-        GoaModelGen::Generator.new(cfg)
+        GoaModelGen::Generator.new(cfg).tap do |g|
+          g.force = options[:force]
+          g.dryrun = options[:dryrun]
+        end
       end
 
       def load_types_for(paths)
@@ -96,6 +92,10 @@ module GoaModelGen
         source_files.each do |source_file|
           yield(source_file)
         end
+      end
+
+      def dest_path(dir, source_file, suffix)
+        File.join(dir, File.basename(source_file.yaml_path, ".*") + suffix)
       end
     end
 

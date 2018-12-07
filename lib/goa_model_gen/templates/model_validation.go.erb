@@ -1,10 +1,26 @@
+<%- user_editable -%>
 <%- package "model" -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
-<%-   import "gopkg.in/go-playground/validator.v9" -%>
-func (m *<%= model.name %>) Validate() error {
-	validator := validator.New()
-	return validator.Struct(m)
+<%-
+      import "context"
+      import config.validator_path # "gopkg.in/go-playground/validator.v9"
+-%>
+<%-   store_name = "#{model.name}Store" -%>
+func (s *<%= store_name %>) Validate(ctx context.Context, m *<%= model.name %>) error {
+	if err := m.Validate(ctx); err != nil {
+		return err
+	}
+	if err := s.ValidateUniqueness(ctx, m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *<%= model.name %>) Validate(ctx context.Context) error {
+	return WithValidator(ctx, func(validate *validator.Validate) error {
+		return validate.Struct(m)
+	})
 }
 
 <%- end -%>

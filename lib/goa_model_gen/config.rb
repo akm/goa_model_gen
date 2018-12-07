@@ -15,6 +15,7 @@ module GoaModelGen
       gofmt_disabled
       model_dir
       controller_dir
+      validator_path
     ].freeze
 
     attr_accessor *ATTRIBUTES
@@ -25,6 +26,7 @@ module GoaModelGen
       @gofmt_disabled ||= false
       @model_dir      ||= "./model"
       @controller_dir ||= "./controller"
+      @validator_path ||= "gopkg.in/go-playground/validator.v9"
       self
     end
 
