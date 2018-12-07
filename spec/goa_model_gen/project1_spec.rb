@@ -13,6 +13,7 @@ RSpec.describe GoaModelGen::Type do
       c.gofmt_disabled = true
       c.model_dir = File.expand_path("../project1/model", __FILE__)
       c.controller_dir = File.expand_path("../project1/controller", __FILE__)
+      c.fulfill
     end
   end
   let(:generator){ GoaModelGen::Generator.new(config) }
