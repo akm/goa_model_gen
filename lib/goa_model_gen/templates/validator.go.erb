@@ -1,0 +1,28 @@
+<%- user_editable -%>
+<%- package "model" -%>
+<%-
+		import(
+			"context",
+			config.validator_path,
+			# ja_translations "github.com/akm/validator/translations/ja",
+		)
+-%>
+
+func NewValidator(ctx context.Context) (*validator.Validate, error) {
+	validate := validator.New()
+	// trans, err := GetTranslator(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// // See https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
+	// ja_translations.RegisterDefaultTranslations(validate, trans)
+	return validate, nil
+}
+
+func WithValidator(ctx context.Context, f func(*validator.Validate) error) error {
+	validate, err := NewValidator(ctx)
+	if err != nil {
+		return err
+	}
+	return f(validate)
+}
