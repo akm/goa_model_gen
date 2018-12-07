@@ -23,12 +23,10 @@ module GoaModelGen
     def bootstrap
       setup
       generator = new_generator
-      {
+      generator.process({
         "templates/goon.go.erb" => "model/goon.go",
         "templates/converter_base.go.erb" => "controller/converter_base.go",
-      }.each do |template, dest|
-        generator.run(template, dest)
-      end
+      })
     end
 
     desc "show FILE1...", "Show model info from definition files"
@@ -45,13 +43,11 @@ module GoaModelGen
       setup
       load_types_for(paths) do |source_file|
         generator = new_generator.tap{|g| g.source_file = source_file }
-        {
+        generator.process({
           'templates/model.go.erb' => dest_path(cfg.model_dir, source_file, '.go'),
           'templates/model_store.go.erb' => dest_path(cfg.model_dir, source_file, '_store.go'),
           'templates/model_validation.go.erb' => dest_path(cfg.model_dir, source_file, '_validation.go'),
-        }.each do |src, dest|
-          generator.run(src, dest)
-        end
+        })
       end
     end
 
@@ -61,11 +57,9 @@ module GoaModelGen
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
         generator = new_generator.tap{|g| g.source_file = source_file }
-        {
+        generator.process({
           'templates/converter.go.erb' => dest_path(cfg.controller_dir, source_file, "_conv.go"),
-        }.each do |src, dest|
-          generator.run(src, dest)
-        end
+        })
       end
     end
 

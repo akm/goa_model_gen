@@ -79,5 +79,9 @@ module GoaModelGen
         system("gofmt -w #{output_path}")
       end
     end
+
+    def process(temp_path_to_dest_path)
+      temp_path_to_dest_path.each{|src, dest| run(src, dest) }
+    end
   end
 end
