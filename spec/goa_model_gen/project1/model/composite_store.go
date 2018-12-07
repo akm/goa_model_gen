@@ -114,8 +114,7 @@ func (s *CompositeStore) Exist(ctx context.Context, m *Composite) (bool, error) 
 }
 
 func (s *CompositeStore) Create(ctx context.Context, m *Composite) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -132,8 +131,7 @@ func (s *CompositeStore) Create(ctx context.Context, m *Composite) (*datastore.K
 }
 
 func (s *CompositeStore) Update(ctx context.Context, m *Composite) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {

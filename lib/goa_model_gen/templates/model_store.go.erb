@@ -133,8 +133,7 @@ func (s *<%= store_name %>) Exist(ctx context.Context, m *<%= model.name %>) (bo
 }
 
 func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -151,8 +150,7 @@ func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*
 }
 
 func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {

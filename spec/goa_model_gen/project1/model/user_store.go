@@ -112,8 +112,7 @@ func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
 }
 
 func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -130,8 +129,7 @@ func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error)
 }
 
 func (s *UserStore) Update(ctx context.Context, m *User) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {

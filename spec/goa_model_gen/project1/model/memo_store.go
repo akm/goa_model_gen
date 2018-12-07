@@ -112,8 +112,7 @@ func (s *MemoStore) Exist(ctx context.Context, m *Memo) (bool, error) {
 }
 
 func (s *MemoStore) Create(ctx context.Context, m *Memo) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -130,8 +129,7 @@ func (s *MemoStore) Create(ctx context.Context, m *Memo) (*datastore.Key, error)
 }
 
 func (s *MemoStore) Update(ctx context.Context, m *Memo) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
