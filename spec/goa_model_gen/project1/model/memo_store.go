@@ -11,7 +11,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-type MemoStore struct{
+type MemoStore struct {
 }
 
 func (s *MemoStore) All(ctx context.Context) ([]*Memo, error) {
@@ -123,7 +123,7 @@ func (s *MemoStore) Create(ctx context.Context, m *Memo) (*datastore.Key, error)
 		}
 		if exist {
 			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
-			return fmt.Errorf("Duplicate  error: %q of %v\n", m., m)
+			return fmt.Errorf("Duplicate Id error: %q of %v\n", m.Id, m)
 		}
 		return nil
 	})
@@ -141,7 +141,7 @@ func (s *MemoStore) Update(ctx context.Context, m *Memo) (*datastore.Key, error)
 		}
 		if !exist {
 			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
-			return fmt.Errorf("No data to update %q of %v\n", m., m)
+			return fmt.Errorf("No data to update %q of %v\n", m.Id, m)
 		}
 		return nil
 	})
@@ -185,17 +185,16 @@ func (s *MemoStore) Delete(ctx context.Context, m *Memo) error {
 }
 
 func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *Memo) error {
-	conditions := map[string]interface{}{
-	}
+	conditions := map[string]interface{}{}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query(ctx).Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
 		}
 		if c > 0 {
 			return &ValidationError{
-				Field: field,
+				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),
 			}
 		}

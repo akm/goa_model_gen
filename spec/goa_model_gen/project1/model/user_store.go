@@ -11,7 +11,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-type UserStore struct{
+type UserStore struct {
 }
 
 func (s *UserStore) All(ctx context.Context) ([]*User, error) {
@@ -189,14 +189,14 @@ func (s *UserStore) ValidateUniqueness(ctx context.Context, m *User) error {
 		"Email": m.Email,
 	}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query(ctx).Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
 		}
 		if c > 0 {
 			return &ValidationError{
-				Field: field,
+				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),
 			}
 		}

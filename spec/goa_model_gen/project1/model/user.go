@@ -8,17 +8,16 @@ import (
 )
 
 type User struct {
-	ID string `datastore:"-" goon:"id" json:"id"`
-	Email string `json:"email" validate:"required,email"`
-	AuthDomain string `json:"auth_domain,omitempty"`
-	Admin bool `json:"admin,omitempty"`
-	ClientId string `json:"client_id,omitempty"`
-	FederatedIdentity string `json:"federated_identity,omitempty"`
-	FederatedProvider string `json:"federated_provider,omitempty"`
-	CreatedAt time.Time `json:"created_at" validate:"required"`
-	UpdatedAt time.Time `json:"updated_at" validate:"required"`
+	ID                string    `datastore:"-" goon:"id" json:"id"`
+	Email             string    `json:"email" validate:"required,email"`
+	AuthDomain        string    `json:"auth_domain,omitempty"`
+	Admin             bool      `json:"admin,omitempty"`
+	ClientId          string    `json:"client_id,omitempty"`
+	FederatedIdentity string    `json:"federated_identity,omitempty"`
+	FederatedProvider string    `json:"federated_provider,omitempty"`
+	CreatedAt         time.Time `json:"created_at" validate:"required"`
+	UpdatedAt         time.Time `json:"updated_at" validate:"required"`
 }
-
 
 func (m *User) PrepareToCreate() error {
 	if m.CreatedAt.IsZero() {
