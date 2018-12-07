@@ -10,14 +10,15 @@ module GoaModelGen
   class Generator
     # These are used in templates
     attr_reader :config
+    attr_accessor :thor
     attr_accessor :source_file
-    attr_accessor :force, :dryrun
+    attr_accessor :force, :skip
 
     def initialize(config)
       @config = config
       @user_editable = false
       @force = false
-      @dryrun = false
+      @skip = false
     end
 
     def golang_helper
@@ -85,20 +86,30 @@ module GoaModelGen
     MAX_ACTION_LENGTH = COLORS.keys.map(&:to_s).map(&:length).max
 
     def run(template_path, output_path)
-      already_exist = File.exist?(output_path)
       content = generate(template_path)
-      modified = already_exist ? (content != File.read(output_path)) : true
-      action =
-        !already_exist ? :generate :
-          !modified ? :no_change :
-            !user_editable? ? :overwrite :
-              force ? :force_overwrite : :keep
-      GoaModelGen.logger.info("%s%-#{MAX_ACTION_LENGTH}s %s%s" % [COLORS[action], action.to_s, output_path, COLORS[:clear]])
-      return if action == :no_change
-      return if dryrun
-      open(output_path, 'w'){|f| f.puts(content) }
       if (File.extname(output_path) == '.go') && !config.gofmt_disabled
-        system("gofmt -w #{output_path}")
+        # https://docs.ruby-lang.org/ja/2.5.0/class/IO.html#S_POPEN
+        content = IO.popen("gofmt", "r+") do |io|
+          io.puts(content)
+          io.close_write
+          io.read
+        end
+      end
+      if thor
+        options = {skip: skip, force: force}
+        thor.create_file(output_path, content, options)
+      else
+        already_exist = File.exist?(output_path)
+        modified = already_exist ? (content != File.read(output_path)) : true
+        action =
+          !already_exist ? :generate :
+            !modified ? :no_change :
+              !user_editable? ? :overwrite :
+                force ? :force_overwrite : :keep
+        GoaModelGen.logger.info("%s%-#{MAX_ACTION_LENGTH}s %s%s" % [COLORS[action], action.to_s, output_path, COLORS[:clear]])
+        return if action == :no_change
+        return if skip
+        open(output_path, 'w'){|f| f.puts(content) }
       end
     end
 
