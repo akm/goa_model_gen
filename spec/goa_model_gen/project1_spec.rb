@@ -28,6 +28,12 @@ RSpec.describe GoaModelGen::Type do
   let(:component1){ types.detect{|t| t.name == "Component1"} }
   let(:composite){ types.detect{|t| t.name == "Composite"} }
 
+  def read_expected(path)
+    abs_path = File.expand_path(File.join('..', path), __FILE__)
+    erb = ERB.new(File.read(abs_path), nil, "-")
+    erb.filename = abs_path
+    erb.result.strip
+  end
 
   context :user do
     subject{ user }
@@ -54,20 +60,20 @@ RSpec.describe GoaModelGen::Type do
         path = File.join(dir, 'user.go')
         generator.source_file = GoaModelGen::SourceFile.new('', [user])
         generator.run('templates/model.go.erb', path)
-        expect(File.read(path).strip).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__)).strip
+        expect(File.read(path).strip).to eq read_expected('project1/model/user.go')
       end
     end
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [user])
-      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/user.go', __FILE__)).strip
-      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/user_store.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/user_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/user.go')
+      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/user_store.go')
+      expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/user_validation.go')
     end
 
     it :generate_converter do
       generator.source_file = GoaModelGen::SourceFile.new('', [user])
-      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/user_conv.go', __FILE__)).strip
+      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/controller/user_conv.go')
     end
   end
 
@@ -90,14 +96,14 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [memo])
-      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/memo.go', __FILE__)).strip
-      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/memo_store.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb').strip). to eq File.read(File.expand_path('../project1/model/memo_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/memo.go')
+      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/memo_store.go')
+      expect(generator.generate('templates/model_validation.go.erb').strip). to eq read_expected('project1/model/memo_validation.go')
     end
 
     it :generate_converter do
       generator.source_file = GoaModelGen::SourceFile.new('', [memo])
-      expect(generator.generate('templates/converter.go.erb')).to eq File.read(File.expand_path('../project1/controller/memo_conv.go', __FILE__)).strip
+      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/controller/memo_conv.go')
     end
   end
 
@@ -114,9 +120,9 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate_model do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1])
-      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only.go', __FILE__)).strip
-      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only_store.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/component1_only_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/component1_only.go')
+      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/component1_only_store.go')
+      expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/component1_only_validation.go')
     end
   end
 
@@ -136,9 +142,9 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate do
       generator.source_file = GoaModelGen::SourceFile.new('', [component1, composite])
-      expect(generator.generate('templates/model.go.erb')).to eq File.read(File.expand_path('../project1/model/composite.go', __FILE__)).strip
-      expect(generator.generate('templates/model_store.go.erb')).to eq File.read(File.expand_path('../project1/model/composite_store.go', __FILE__)).strip
-      expect(generator.generate('templates/model_validation.go.erb')).to eq File.read(File.expand_path('../project1/model/composite_validation.go', __FILE__)).strip
+      expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/composite.go')
+      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/composite_store.go')
+      expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/composite_validation.go')
     end
   end
 

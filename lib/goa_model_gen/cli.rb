@@ -27,7 +27,7 @@ module GoaModelGen
         "templates/goon.go.erb" => "model/goon.go",
         "templates/converter_base.go.erb" => "controller/converter_base.go",
       }.each do |template, dest|
-        generator.run(template, dest, overwrite: true)
+        generator.run(template, dest)
       end
     end
 
@@ -46,11 +46,11 @@ module GoaModelGen
       load_types_for(paths) do |source_file|
         generator = new_generator.tap{|g| g.source_file = source_file }
         [
-          {path: 'templates/model.go.erb', suffix: '.go', overwrite: true},
-          {path: 'templates/model_validation.go.erb', suffix: '_validation.go', overwrite: false},
+          {path: 'templates/model.go.erb', suffix: '.go'},
+          {path: 'templates/model_validation.go.erb', suffix: '_validation.go'},
         ].each do |d|
           dest = File.join(cfg.model_dir, File.basename(source_file.yaml_path, ".*") + d[:suffix])
-          generator.run(d[:path], dest, overwrite: d[:overwrite])
+          generator.run(d[:path], dest)
         end
       end
     end
@@ -62,7 +62,7 @@ module GoaModelGen
         generator = new_generator.tap{|g| g.source_file = source_file }
         dest = File.join(cfg.controller_dir, File.basename(source_file.yaml_path, ".*") + "_conv.go")
         if source_file.types.any?{|t| !!t.payload || !!t.media_type}
-          generator.run('templates/converter.go.erb', dest, overwrite: true)
+          generator.run('templates/converter.go.erb')
         end
       end
     end

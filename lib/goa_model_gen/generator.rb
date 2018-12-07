@@ -14,6 +14,7 @@ module GoaModelGen
 
     def initialize(config)
       @config = config
+      @user_editable = false
     end
 
     def golang_helper
@@ -42,6 +43,13 @@ module GoaModelGen
       end
     end
 
+    def user_editable(value: true)
+      @user_editable = value
+    end
+    def user_editable?
+      @user_editable
+    end
+
     GO_BASE_PATH = File.expand_path('../templates/base.go.erb', __FILE__)
 
     PACKAGE_FOR_IMPORT = {
@@ -63,8 +71,8 @@ module GoaModelGen
       base.result(binding).strip
     end
 
-    def run(template_path, output_path, overwrite: false)
-      return if File.exist?(output_path) && !overwrite
+    def run(template_path, output_path)
+      return if user_editable? && File.exist?(output_path)
       content = generate(template_path)
       open(output_path, 'w'){|f| f.puts(content) }
       if (File.extname(output_path) == '.go') && !config.gofmt_disabled
