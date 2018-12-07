@@ -95,12 +95,12 @@ module GoaModelGen
     def run(template_path, output_path)
       content = generate(template_path)
 
-      options = {skip: skip, force: force}
       if user_editable? && keep_editable
         $stderr.puts("%sKEEP%s %s" % [COLORS[:blue], COLORS[:clear], output_path])
-        options[:skip] = true
+        return
       end
 
+      options = {skip: skip, force: force}
       thor.create_file(output_path, content, options)
     end
 
