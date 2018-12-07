@@ -43,6 +43,10 @@ func IntToInt64Pointer(v int) *int64 {
 	return &r
 }
 
+func StringToStringPointer(v string) *string {
+	return &v
+}
+
 func StringPointerToString(v *string) string {
 	return StringPointerToStringWith(v, "")
 }
