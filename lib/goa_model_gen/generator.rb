@@ -13,6 +13,7 @@ module GoaModelGen
     attr_accessor :thor
     attr_accessor :source_file
     attr_accessor :force, :skip
+    attr_accessor :keep_editable
 
     def initialize(config)
       @config = config
@@ -95,22 +96,14 @@ module GoaModelGen
           io.read
         end
       end
-      if thor
-        options = {skip: skip, force: force}
-        thor.create_file(output_path, content, options)
-      else
-        already_exist = File.exist?(output_path)
-        modified = already_exist ? (content != File.read(output_path)) : true
-        action =
-          !already_exist ? :generate :
-            !modified ? :no_change :
-              !user_editable? ? :overwrite :
-                force ? :force_overwrite : :keep
-        GoaModelGen.logger.info("%s%-#{MAX_ACTION_LENGTH}s %s%s" % [COLORS[action], action.to_s, output_path, COLORS[:clear]])
-        return if action == :no_change
-        return if skip
-        open(output_path, 'w'){|f| f.puts(content) }
+
+      options = {skip: skip, force: force}
+      if user_editable? && keep_editable
+        GoaModelGen.logger.info("%sKEEP%s %s" % [COLORS[:keep], output_path, COLORS[:clear]])
+        options[:skip] = true
       end
+
+      thor.create_file(output_path, content, options)
     end
 
     def process(temp_path_to_dest_path)
