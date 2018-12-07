@@ -96,6 +96,9 @@ func (s *CompositeStore) IsValidKey(ctx context.Context, key *datastore.Key) err
 }
 
 func (s *CompositeStore) Exist(ctx context.Context, m *Composite) (bool, error) {
+	if m.ID == "" {
+		return false, nil
+	}
 	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {

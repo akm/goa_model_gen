@@ -115,6 +115,9 @@ func (s *<%= store_name %>) IsValidKey(ctx context.Context, key *datastore.Key) 
 }
 
 func (s *<%= store_name %>) Exist(ctx context.Context, m *<%= model.name %>) (bool, error) {
+	if m.ID == <%= model.id_field.zero_value_expression %> {
+		return false, nil
+	}
 	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {

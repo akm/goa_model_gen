@@ -94,6 +94,9 @@ func (s *MemoStore) IsValidKey(ctx context.Context, key *datastore.Key) error {
 }
 
 func (s *MemoStore) Exist(ctx context.Context, m *Memo) (bool, error) {
+	if m.ID == 0 {
+		return false, nil
+	}
 	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
