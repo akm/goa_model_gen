@@ -1,10 +1,23 @@
 package model
 
 import (
+	"context"
+
 	"gopkg.in/go-playground/validator.v9"
 )
 
-func (m *Composite) Validate() error {
-	validator := validator.New()
-	return validator.Struct(m)
+func (s *CompositeStore) Validate(ctx context.Context, m *Tenant) error {
+	if err := m.Validate(ctx); err != nil {
+		return err
+	}
+	if err := s.ValidateUniqueness(ctx, m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Composite) Validate(ctx context.Context) error {
+	return WithValidator(ctx, func(validate *validator.Validate) error {
+		return validate.Struct(m)
+	})
 }

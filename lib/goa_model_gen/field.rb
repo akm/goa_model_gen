@@ -9,6 +9,7 @@ module GoaModelGen
     attr_reader :name, :type, :default
     attr_accessor :format # for swagger. See https://swagger.io/docs/specification/data-models/data-types/
     attr_accessor :required
+    attr_accessor :unique
     attr_accessor :validation
     attr_accessor :swagger_name
     attr_reader :type_obj
@@ -19,6 +20,7 @@ module GoaModelGen
       @type = attrs['type']
       @format = attrs['format']
       @required = attrs['required']
+      @unique = attrs['unique']
       @default = attrs['default']
       @validation = attrs['validation']
       @goa_name = attrs['goa_name']
@@ -47,6 +49,10 @@ module GoaModelGen
 
     def optional?
       !required
+    end
+
+    def unique?
+      !!unique
     end
 
     def not_null?

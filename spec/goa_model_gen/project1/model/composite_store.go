@@ -29,6 +29,16 @@ func (s *CompositeStore) Select(ctx context.Context, q *datastore.Query) ([]*Com
 	return r, nil
 }
 
+func (s *CompositeStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
+	g := GoonFromContext(ctx)
+	c, err := g.Count(q)
+	if err != nil {
+		log.Errorf(ctx, "Failed to count Composite with %v because of %v\n", q, err)
+		return 0, err
+	}
+	return c, nil
+}
+
 func (s *CompositeStore) Query(ctx context.Context) *datastore.Query {
 	g := GoonFromContext(ctx)
 	k := g.Kind(new(Composite))
@@ -149,6 +159,25 @@ func (s *CompositeStore) Delete(ctx context.Context, m *Composite) error {
 	if err := g.Delete(key); err != nil {
 		log.Errorf(ctx, "Failed to Delete %v because of %v\n", m, err)
 		return err
+	}
+	return nil
+}
+
+func (s *CompositeStore) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+	conditions := map[string]interface{}{
+	}
+	for field, value := range conditions {
+		q := s.Query(ctx).Filter(field + " =", value)
+		c, err := s.CountBy(ctx, q)
+		if err != nil {
+			return err
+		}
+		if c > 0 {
+			return &ValidationError{
+				Field: field,
+				Message: fmt.Sprintf("%v has already been taken", value),
+			}
+		}
 	}
 	return nil
 }

@@ -27,6 +27,16 @@ func (s *UserStore) Select(ctx context.Context, q *datastore.Query) ([]*User, er
 	return r, nil
 }
 
+func (s *UserStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
+	g := GoonFromContext(ctx)
+	c, err := g.Count(q)
+	if err != nil {
+		log.Errorf(ctx, "Failed to count User with %v because of %v\n", q, err)
+		return 0, err
+	}
+	return c, nil
+}
+
 func (s *UserStore) Query(ctx context.Context) *datastore.Query {
 	g := GoonFromContext(ctx)
 	k := g.Kind(new(User))
@@ -160,6 +170,26 @@ func (s *UserStore) Delete(ctx context.Context, m *User) error {
 	if err := g.Delete(key); err != nil {
 		log.Errorf(ctx, "Failed to Delete %v because of %v\n", m, err)
 		return err
+	}
+	return nil
+}
+
+func (s *UserStore) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+	conditions := map[string]interface{}{
+		"Email": m.Email,
+	}
+	for field, value := range conditions {
+		q := s.Query(ctx).Filter(field + " =", value)
+		c, err := s.CountBy(ctx, q)
+		if err != nil {
+			return err
+		}
+		if c > 0 {
+			return &ValidationError{
+				Field: field,
+				Message: fmt.Sprintf("%v has already been taken", value),
+			}
+		}
 	}
 	return nil
 }

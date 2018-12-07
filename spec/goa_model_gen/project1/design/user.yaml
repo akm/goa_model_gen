@@ -19,6 +19,7 @@ types:
       Email:
         type: string
         required: true
+        unique: true
         validation: email
       AuthDomain: string
       Admin: bool
