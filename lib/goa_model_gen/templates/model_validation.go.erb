@@ -7,7 +7,7 @@
       import "gopkg.in/go-playground/validator.v9"
 -%>
 <%-   store_name = "#{model.name}Store" -%>
-func (s *<%= store_name %>) Validate(ctx context.Context, m *Tenant) error {
+func (s *<%= store_name %>) Validate(ctx context.Context, m *<%= model.name %>) error {
 	if err := m.Validate(ctx); err != nil {
 		return err
 	}

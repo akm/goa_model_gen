@@ -229,7 +229,7 @@ func (s *<%= store_name %>) Delete(ctx context.Context, m *<%= model.name %>) er
 	return nil
 }
 
-func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *Tenant) error {
+func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *<%= model.name %>) error {
 	conditions := map[string]interface{}{
 <%- model.fields.select(&:unique?).each do |field| -%>
 		"<%= field.name %>": m.<%= field.name %>,
