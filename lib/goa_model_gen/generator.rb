@@ -76,6 +76,15 @@ module GoaModelGen
       base.result(binding).strip << "\n"
     end
 
+    def gofmt(content)
+      # https://docs.ruby-lang.org/ja/2.5.0/class/IO.html#S_POPEN
+      return IO.popen("gofmt", "r+") do |io|
+        io.puts(content)
+        io.close_write
+        io.read
+      end
+    end
+
     COLORS = {
       generate: "\e[32m",        # green   # !file_exist
       no_change: "\e[37m",    # white   # file_exist && !modified
@@ -89,12 +98,7 @@ module GoaModelGen
     def run(template_path, output_path)
       content = generate(template_path)
       if (File.extname(output_path) == '.go') && !config.gofmt_disabled
-        # https://docs.ruby-lang.org/ja/2.5.0/class/IO.html#S_POPEN
-        content = IO.popen("gofmt", "r+") do |io|
-          io.puts(content)
-          io.close_write
-          io.read
-        end
+        content = gofmt(content)
       end
 
       options = {skip: skip, force: force}
