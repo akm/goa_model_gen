@@ -71,7 +71,7 @@ module GoaModelGen
 
       base = ERB.new(File.read(GO_BASE_PATH), nil, "-")
       base.filename = GO_BASE_PATH
-      base.result(binding).strip
+      base.result(binding).strip << "\n"
     end
 
     COLORS = {
