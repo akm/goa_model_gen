@@ -1,14 +1,14 @@
 <%- package "model" -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
-<%-   store_name = "#{model.name}Store" -%>
+<%-	 store_name = "#{model.name}Store" -%>
 <%-
-      import(
-        "context",
-        "fmt",
-        "google.golang.org/appengine/datastore",
-        "google.golang.org/appengine/log",
-      )
+			import(
+				"context",
+				"fmt",
+				"google.golang.org/appengine/datastore",
+				"google.golang.org/appengine/log",
+			)
 -%>
 type <%= store_name %> struct{
 <%- if model.parent -%>
@@ -55,7 +55,7 @@ func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <
 <%- else -%>
 	r := <%= model.name %>{<%= model.id_name %>: <%= model.id_name_var %>}
 <%- end -%>
-  err := s.Get(ctx, &r)
+	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -133,54 +133,57 @@ func (s *<%= store_name %>) Exist(ctx context.Context, m *<%= model.name %>) (bo
 }
 
 func (s *<%= store_name %>) Create(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-  err := m.PrepareToCreate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
-		return nil, err
-	}
-
-<%- if model.goon['id_type'] == 'string' -%>
-	exist, err := s.Exist(ctx, m)
+	err := m.PrepareToCreate()
 	if err != nil {
 		return nil, err
 	}
-	if exist {
-		log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
-		return nil, fmt.Errorf("Duplicate <%= model.goon['id_name'] %> error: %q of %v\n", m.<%= model.goon['id_name'] %>, m)
-	}
-<%- end -%>
-
-  return s.Put(ctx, m)
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if exist {
+			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
+			return fmt.Errorf("Duplicate <%= model.goon['id_name'] %> error: %q of %v\n", m.<%= model.goon['id_name'] %>, m)
+		}
+		return nil
+	})
 }
 
 func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
-  err := m.PrepareToUpdate()
-  if err != nil {
-    return nil, err
-  }
-	if err := m.Validate(); err != nil {
-		return nil, err
-	}
-
-<%- if model.goon['id_type'] == 'string' -%>
-	exist, err := s.Exist(ctx, m)
+	err := m.PrepareToUpdate()
 	if err != nil {
 		return nil, err
 	}
-	if !exist {
-		log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
-		return nil, fmt.Errorf("No data to update %q of %v\n", m.<%= model.goon['id_name'] %>, m)
-	}
-<%- end -%>
+	return s.PutWith(ctx, m, func() error {
+		exist, err := s.Exist(ctx, m)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
+			return fmt.Errorf("No data to update %q of %v\n", m.<%= model.goon['id_name'] %>, m)
+		}
+		return nil
+	})
+}
 
-  return s.Put(ctx, m)
+func (s *<%= store_name %>) PutWith(ctx context.Context, m *<%= model.name %>, f func() error) (*datastore.Key, error) {
+	if err := s.Validate(ctx, m); err != nil {
+		return nil, err
+	}
+	if f != nil {
+		if err := f(); err != nil {
+			return nil, err
+		}
+	}
+
+	return s.Put(ctx, m)
 }
 
 func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*datastore.Key, error) {
 <%- if model.goon['id_type'] == 'UUID' -%>
-<%-   import "github.com/goadesign/goa/uuid" -%>
+<%-	 import "github.com/goadesign/goa/uuid" -%>
 	if m.Id == "" {
 		m.Id = uuid.NewV4().String()
 	}
@@ -203,13 +206,13 @@ func (s *<%= store_name %>) Put(ctx context.Context, m *<%= model.name %>) (*dat
 <%- if model.parent -%>
 func (s *<%= store_name %>) ValidateParent(m *<%= model.name %>) error {
 	if s.ParentKey == nil {
-	  return nil
+		return nil
 	}
 	if m.ParentKey == nil {
 		m.ParentKey = s.ParentKey
 	}
 	if !s.ParentKey.Equal(m.ParentKey) {
-	  return fmt.Errorf("Invalid ParentKey for %v", m)
+		return fmt.Errorf("Invalid ParentKey for %v", m)
 	}
 	return nil
 }
