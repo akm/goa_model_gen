@@ -73,7 +73,9 @@ module GoaModelGen
 
       base = ERB.new(File.read(GO_BASE_PATH), nil, "-")
       base.filename = GO_BASE_PATH
-      base.result(binding).strip << "\n"
+      r = base.result(binding).strip << "\n"
+      r = gofmt(r) unless config.gofmt_disabled
+      return r
     end
 
     def gofmt(content)
@@ -97,9 +99,6 @@ module GoaModelGen
 
     def run(template_path, output_path)
       content = generate(template_path)
-      if (File.extname(output_path) == '.go') && !config.gofmt_disabled
-        content = gofmt(content)
-      end
 
       options = {skip: skip, force: force}
       if user_editable? && keep_editable
