@@ -88,21 +88,16 @@ module GoaModelGen
     end
 
     COLORS = {
-      generate: "\e[32m",        # green   # !file_exist
-      no_change: "\e[37m",    # white   # file_exist && !modified
-      overwrite: "\e[33m",       # yellow  # file_exist && !user_editable
-      keep: "\e[34m",            # blue    # file_exist && user_editable && !force
-      force_overwrite: "\e[31m", # red     # file_exist && user_editable && force
-      clear: "\e[0m",            # clear
+      blue:  "\e[34m",
+      clear: "\e[0m",
     }
-    MAX_ACTION_LENGTH = COLORS.keys.map(&:to_s).map(&:length).max
 
     def run(template_path, output_path)
       content = generate(template_path)
 
       options = {skip: skip, force: force}
       if user_editable? && keep_editable
-        GoaModelGen.logger.info("%sKEEP%s %s" % [COLORS[:keep], output_path, COLORS[:clear]])
+        $stderr.puts("%sKEEP%s %s" % [COLORS[:blue], COLORS[:clear], output_path])
         options[:skip] = true
       end
 
