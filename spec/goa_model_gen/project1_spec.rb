@@ -58,10 +58,12 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate do
       Dir.mktmpdir do |dir|
+        thor = double(:thor)
         path = File.join(dir, 'user.go')
         generator.source_file = GoaModelGen::SourceFile.new('', [user])
+        generator.thor = thor
+        expect(thor).to receive(:create_file).with(path, read_expected('project1/model/user.go'), {skip: false, force: false})
         generator.run('templates/model.go.erb', path)
-        expect(File.read(path)).to eq read_expected('project1/model/user.go')
       end
     end
 
