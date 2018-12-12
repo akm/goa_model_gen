@@ -11,7 +11,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-type UserStore struct{
+type UserStore struct {
 }
 
 func (s *UserStore) All(ctx context.Context) ([]*User, error) {
@@ -94,6 +94,9 @@ func (s *UserStore) IsValidKey(ctx context.Context, key *datastore.Key) error {
 }
 
 func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
+	if m.ID == "" {
+		return false, nil
+	}
 	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
@@ -112,8 +115,7 @@ func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
 }
 
 func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -130,8 +132,7 @@ func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error)
 }
 
 func (s *UserStore) Update(ctx context.Context, m *User) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -189,14 +190,14 @@ func (s *UserStore) ValidateUniqueness(ctx context.Context, m *User) error {
 		"Email": m.Email,
 	}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query(ctx).Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
 		}
 		if c > 0 {
 			return &ValidationError{
-				Field: field,
+				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),
 			}
 		}

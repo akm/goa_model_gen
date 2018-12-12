@@ -10,14 +10,16 @@ module GoaModelGen
   class Generator
     # These are used in templates
     attr_reader :config
+    attr_accessor :thor
     attr_accessor :source_file
-    attr_accessor :force, :dryrun
+    attr_accessor :force, :skip
+    attr_accessor :keep_editable
 
     def initialize(config)
       @config = config
       @user_editable = false
       @force = false
-      @dryrun = false
+      @skip = false
     end
 
     def golang_helper
@@ -71,35 +73,35 @@ module GoaModelGen
 
       base = ERB.new(File.read(GO_BASE_PATH), nil, "-")
       base.filename = GO_BASE_PATH
-      base.result(binding).strip
+      r = base.result(binding).strip << "\n"
+      r = gofmt(r) unless config.gofmt_disabled
+      return r
+    end
+
+    def gofmt(content)
+      # https://docs.ruby-lang.org/ja/2.5.0/class/IO.html#S_POPEN
+      return IO.popen("gofmt", "r+") do |io|
+        io.puts(content)
+        io.close_write
+        io.read
+      end
     end
 
     COLORS = {
-      generate: "\e[32m",        # green   # !file_exist
-      no_change: "\e[37m",    # white   # file_exist && !modified
-      overwrite: "\e[33m",       # yellow  # file_exist && !user_editable
-      keep: "\e[34m",            # blue    # file_exist && user_editable && !force
-      force_overwrite: "\e[31m", # red     # file_exist && user_editable && force
-      clear: "\e[0m",            # clear
+      blue:  "\e[34m",
+      clear: "\e[0m",
     }
-    MAX_ACTION_LENGTH = COLORS.keys.map(&:to_s).map(&:length).max
 
     def run(template_path, output_path)
-      already_exist = File.exist?(output_path)
       content = generate(template_path)
-      modified = already_exist ? (content != File.read(output_path)) : true
-      action =
-        !already_exist ? :generate :
-          !modified ? :no_change :
-            !user_editable? ? :overwrite :
-              force ? :force_overwrite : :keep
-      GoaModelGen.logger.info("%s%-#{MAX_ACTION_LENGTH}s %s%s" % [COLORS[action], action.to_s, output_path, COLORS[:clear]])
-      return if action == :no_change
-      return if dryrun
-      open(output_path, 'w'){|f| f.puts(content) }
-      if (File.extname(output_path) == '.go') && !config.gofmt_disabled
-        system("gofmt -w #{output_path}")
+
+      if user_editable? && keep_editable
+        $stderr.puts("%sKEEP%s %s" % [COLORS[:blue], COLORS[:clear], output_path])
+        return
       end
+
+      options = {skip: skip, force: force}
+      thor.create_file(output_path, content, options)
     end
 
     def process(temp_path_to_dest_path)

@@ -10,7 +10,7 @@ RSpec.describe GoaModelGen::Type do
     GoaModelGen::Config.new.tap do |c|
       c.go_package = "github.com/akm/goa_model_gen/project1"
       c.swagger_yaml   = File.expand_path("../project1/swagger/swagger.yaml", __FILE__)
-      c.gofmt_disabled = true
+      c.gofmt_disabled = false
       c.model_dir = File.expand_path("../project1/model", __FILE__)
       c.controller_dir = File.expand_path("../project1/controller", __FILE__)
       c.fulfill
@@ -33,7 +33,7 @@ RSpec.describe GoaModelGen::Type do
     abs_path = File.expand_path(File.join('..', path), __FILE__)
     erb = ERB.new(File.read(abs_path), nil, "-")
     erb.filename = abs_path
-    erb.result.strip
+    erb.result
   end
 
   context :user do
@@ -58,10 +58,12 @@ RSpec.describe GoaModelGen::Type do
 
     it :generate do
       Dir.mktmpdir do |dir|
+        thor = double(:thor)
         path = File.join(dir, 'user.go')
         generator.source_file = GoaModelGen::SourceFile.new('', [user])
+        generator.thor = thor
+        expect(thor).to receive(:create_file).with(path, read_expected('project1/model/user.go'), {skip: false, force: false})
         generator.run('templates/model.go.erb', path)
-        expect(File.read(path).strip).to eq read_expected('project1/model/user.go')
       end
     end
 
@@ -99,7 +101,7 @@ RSpec.describe GoaModelGen::Type do
       generator.source_file = GoaModelGen::SourceFile.new('', [memo])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/memo.go')
       expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/memo_store.go')
-      expect(generator.generate('templates/model_validation.go.erb').strip). to eq read_expected('project1/model/memo_validation.go')
+      expect(generator.generate('templates/model_validation.go.erb')). to eq read_expected('project1/model/memo_validation.go')
     end
 
     it :generate_converter do

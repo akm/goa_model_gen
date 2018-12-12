@@ -62,6 +62,16 @@ module GoaModelGen
       !not_null?
     end
 
+    def zero_value_expression
+      case type
+      when 'bool' then 'false'
+      when 'int', 'int32', 'int64',
+           'float', 'float32', 'float64' then '0'
+      when 'string', 'UUID' then '""'
+      else raise "Unsupproted zero value for #{type}"
+      end
+    end
+
     def assign_type_base(types)
       @type_obj = types[self.type]
     end

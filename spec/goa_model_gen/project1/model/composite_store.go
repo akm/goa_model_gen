@@ -13,7 +13,7 @@ import (
 	"github.com/goadesign/goa/uuid"
 )
 
-type CompositeStore struct{
+type CompositeStore struct {
 }
 
 func (s *CompositeStore) All(ctx context.Context) ([]*Composite, error) {
@@ -96,6 +96,9 @@ func (s *CompositeStore) IsValidKey(ctx context.Context, key *datastore.Key) err
 }
 
 func (s *CompositeStore) Exist(ctx context.Context, m *Composite) (bool, error) {
+	if m.ID == "" {
+		return false, nil
+	}
 	g := GoonFromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
@@ -114,8 +117,7 @@ func (s *CompositeStore) Exist(ctx context.Context, m *Composite) (bool, error) 
 }
 
 func (s *CompositeStore) Create(ctx context.Context, m *Composite) (*datastore.Key, error) {
-	err := m.PrepareToCreate()
-	if err != nil {
+	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -125,15 +127,14 @@ func (s *CompositeStore) Create(ctx context.Context, m *Composite) (*datastore.K
 		}
 		if exist {
 			log.Errorf(ctx, "Failed to create %v because of another entity has same key\n", m)
-			return fmt.Errorf("Duplicate  error: %q of %v\n", m., m)
+			return fmt.Errorf("Duplicate Id error: %q of %v\n", m.Id, m)
 		}
 		return nil
 	})
 }
 
 func (s *CompositeStore) Update(ctx context.Context, m *Composite) (*datastore.Key, error) {
-	err := m.PrepareToUpdate()
-	if err != nil {
+	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
 	return s.PutWith(ctx, m, func() error {
@@ -143,7 +144,7 @@ func (s *CompositeStore) Update(ctx context.Context, m *Composite) (*datastore.K
 		}
 		if !exist {
 			log.Errorf(ctx, "Failed to update %v because it doesn't exist\n", m)
-			return fmt.Errorf("No data to update %q of %v\n", m., m)
+			return fmt.Errorf("No data to update %q of %v\n", m.Id, m)
 		}
 		return nil
 	})
@@ -190,17 +191,16 @@ func (s *CompositeStore) Delete(ctx context.Context, m *Composite) error {
 }
 
 func (s *CompositeStore) ValidateUniqueness(ctx context.Context, m *Composite) error {
-	conditions := map[string]interface{}{
-	}
+	conditions := map[string]interface{}{}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query(ctx).Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
 		}
 		if c > 0 {
 			return &ValidationError{
-				Field: field,
+				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),
 			}
 		}
