@@ -55,6 +55,10 @@ func (m *<%= model.name %>) PrepareToUpdate() error {
 	return nil
 }
 
+func (m *<%= model.name %>) IsPersisted() bool {
+	return m.ID != <%= model.id_field.zero_value_expression %>
+}
+
 <%-   if model.parent -%>
 <%-     import "context" -%>
 func (m *<%= model.name %>) Parent(ctx context.Context) (*<%= model.parent %>, error) {
