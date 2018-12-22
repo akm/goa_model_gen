@@ -1,11 +1,9 @@
 <%- user_editable -%>
 <%- package "model" -%>
 <%-
-		import(
-			"context",
-			config.validator_path,
-			# ja_translations "github.com/akm/validator/translations/ja",
-		)
+		import "context"
+		import 	config.validator_path,
+		# import ja_translations "github.com/akm/validator/translations/ja"
 -%>
 
 func NewValidator(ctx context.Context) (*validator.Validate, error) {

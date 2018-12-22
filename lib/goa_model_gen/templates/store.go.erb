@@ -3,12 +3,10 @@
 <%- source_file.types.select(&:store?).each do |model| -%>
 <%-	 store_name = "#{model.name}Store" -%>
 <%-
-			import(
-				"context",
-				"fmt",
-				"google.golang.org/appengine/datastore",
-				"google.golang.org/appengine/log",
-			)
+			import "context"
+			import "fmt"
+			import "google.golang.org/appengine/datastore"
+			import "google.golang.org/appengine/log"
 -%>
 type <%= store_name %> struct{
 <%- if model.parent -%>

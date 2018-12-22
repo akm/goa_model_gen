@@ -42,10 +42,8 @@ module GoaModelGen
       @dependencies = nil
     end
 
-    def import(*packages)
-      packages.each do |package|
-        dependencies.push(package) unless dependencies.include?(package)
-      end
+    def import(package)
+      dependencies.push(package) unless dependencies.include?(package)
     end
 
     def user_editable(value: true)
