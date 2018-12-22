@@ -193,7 +193,11 @@ func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *Memo) error {
 		if err != nil {
 			return err
 		}
-		if c > 0 {
+		b := 0
+		if m.IsPersisted() {
+			b = 1
+		}
+		if c > b {
 			return &ValidationError{
 				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),

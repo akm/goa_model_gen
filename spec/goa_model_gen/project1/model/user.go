@@ -33,3 +33,7 @@ func (m *User) PrepareToUpdate() error {
 	m.UpdatedAt = time.Now()
 	return nil
 }
+
+func (m *User) IsPersisted() bool {
+	return m.ID != ""
+}

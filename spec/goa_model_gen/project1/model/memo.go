@@ -32,3 +32,7 @@ func (m *Memo) PrepareToUpdate() error {
 	m.UpdatedAt = time.Now()
 	return nil
 }
+
+func (m *Memo) IsPersisted() bool {
+	return m.ID != 0
+}
