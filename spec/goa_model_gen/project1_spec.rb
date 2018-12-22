@@ -12,7 +12,8 @@ RSpec.describe GoaModelGen::Type do
       c.swagger_yaml   = File.expand_path("../project1/swagger/swagger.yaml", __FILE__)
       c.gofmt_disabled = false
       c.model_dir = File.expand_path("../project1/model", __FILE__)
-      c.controller_dir = File.expand_path("../project1/controller", __FILE__)
+      c.store_dir = File.expand_path("../project1/stores", __FILE__)
+      c.converter_dir = File.expand_path("../project1/converters", __FILE__)
       c.fulfill
     end
   end
@@ -60,7 +61,7 @@ RSpec.describe GoaModelGen::Type do
       Dir.mktmpdir do |dir|
         thor = double(:thor)
         path = File.join(dir, 'user.go')
-        generator.source_file = GoaModelGen::SourceFile.new('', [user])
+        generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
         generator.thor = thor
         expect(thor).to receive(:create_file).with(path, read_expected('project1/model/user.go'), {skip: false, force: false})
         generator.run('templates/model.go.erb', path)
@@ -68,15 +69,15 @@ RSpec.describe GoaModelGen::Type do
     end
 
     it :generate_model do
-      generator.source_file = GoaModelGen::SourceFile.new('', [user])
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/user.go')
-      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/user_store.go')
+      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/user/store.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/user_validation.go')
     end
 
     it :generate_converter do
-      generator.source_file = GoaModelGen::SourceFile.new('', [user])
-      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/controller/user_conv.go')
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
+      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/converters/user/conv.go')
     end
   end
 
@@ -98,15 +99,15 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
 
     it :generate_model do
-      generator.source_file = GoaModelGen::SourceFile.new('', [memo])
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/memo.yaml', [memo])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/memo.go')
-      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/memo_store.go')
+      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/memo/store.go')
       expect(generator.generate('templates/model_validation.go.erb')). to eq read_expected('project1/model/memo_validation.go')
     end
 
     it :generate_converter do
-      generator.source_file = GoaModelGen::SourceFile.new('', [memo])
-      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/controller/memo_conv.go')
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/memo.yaml', [memo])
+      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/converters/memo/conv.go')
     end
   end
 
@@ -122,9 +123,9 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Name').definition).to eq 'Name string `json:"name" validate:"required"`'}
 
     it :generate_model do
-      generator.source_file = GoaModelGen::SourceFile.new('', [component1])
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/component1_only.yaml', [component1])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/component1_only.go')
-      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/component1_only_store.go')
+      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/component1_only/store.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/component1_only_validation.go')
     end
   end
@@ -144,9 +145,9 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Components').definition).to eq 'Components []Component1 `json:"components,omitempty"`'}
 
     it :generate do
-      generator.source_file = GoaModelGen::SourceFile.new('', [component1, composite])
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/composite.yaml', [component1, composite])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/composite.go')
-      expect(generator.generate('templates/model_store.go.erb')).to eq read_expected('project1/model/composite_store.go')
+      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/composite/store.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/composite_validation.go')
     end
   end
