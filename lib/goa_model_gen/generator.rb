@@ -67,6 +67,7 @@ module GoaModelGen
 
     def generate(template_path)
       clear_dependencies
+      user_editable(value: false)
 
       abs_path = File.expand_path('../' + template_path, __FILE__)
       erb = ERB.new(File.read(abs_path), nil, "-")
