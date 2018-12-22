@@ -42,9 +42,9 @@ module GoaModelGen
       })
       load_types_for(paths) do |source_file|
         new_generator.tap{|g| g.source_file = source_file }.process({
-          'templates/model.go.erb' => dest_path(cfg.model_dir, source_file, '.go'),
-          'templates/model_store.go.erb' => dest_path(cfg.model_dir, source_file, '_store.go'),
-          'templates/model_validation.go.erb' => dest_path(cfg.model_dir, source_file, '_validation.go'),
+          'templates/model.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}.go"),
+          'templates/model_store.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}_store.go"),
+          'templates/model_validation.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}_validation.go"),
         })
       end
     end
@@ -58,7 +58,7 @@ module GoaModelGen
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
         new_generator.tap{|g| g.source_file = source_file }.process({
-          'templates/converter.go.erb' => dest_path(cfg.controller_dir, source_file, "_conv.go"),
+          'templates/converter.go.erb' => File.join(cfg.controller_dir, "#{source_file.basename}_conv.go"),
         })
       end
     end
@@ -97,10 +97,6 @@ module GoaModelGen
         source_files.each do |source_file|
           yield(source_file)
         end
-      end
-
-      def dest_path(dir, source_file, suffix)
-        File.join(dir, source_file.basename + suffix)
       end
     end
 
