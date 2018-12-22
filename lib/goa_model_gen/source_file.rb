@@ -8,5 +8,9 @@ module GoaModelGen
     def initialize(yaml_path, types)
       @yaml_path, @types = yaml_path, types
     end
+
+    def basename
+      File.basename(yaml_path, ".*")
+    end
   end
 end

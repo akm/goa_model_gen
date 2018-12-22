@@ -100,7 +100,7 @@ module GoaModelGen
       end
 
       def dest_path(dir, source_file, suffix)
-        File.join(dir, File.basename(source_file.yaml_path, ".*") + suffix)
+        File.join(dir, source_file.basename + suffix)
       end
     end
 
