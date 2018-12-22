@@ -7,7 +7,7 @@ def method_calling_exp(m, argument)
   end
 end
 -%>
-<%- package 'controller' -%>
+<%- package source_file.basename -%>
 
 <%- source_file.types.select(&:gen_converter?).each do |type| -%>
 <%-   if type.payload -%>

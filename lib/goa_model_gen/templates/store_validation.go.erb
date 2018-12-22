@@ -1,5 +1,5 @@
 <%- user_editable -%>
-<%- package "model" -%>
+<%- package source_file.basename -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
 <%-

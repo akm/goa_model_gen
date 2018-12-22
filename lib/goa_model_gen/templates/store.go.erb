@@ -1,4 +1,4 @@
-<%- package "model" -%>
+<%- package source_file.basename -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
 <%-	 store_name = "#{model.name}Store" -%>
@@ -7,6 +7,8 @@
 			import "fmt"
 			import "google.golang.org/appengine/datastore"
 			import "google.golang.org/appengine/log"
+      import "#{config.go_package}/model"
+      import :goon, "#{config.go_package}/stores/goon_store"
 -%>
 type <%= store_name %> struct{
 <%- if model.parent -%>
