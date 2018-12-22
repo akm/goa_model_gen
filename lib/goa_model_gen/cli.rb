@@ -37,14 +37,26 @@ module GoaModelGen
     def model(*paths)
       setup
       new_generator.process({
-        "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
         'templates/validator.go.erb' => File.join(cfg.model_dir, 'validator.go'),
       })
       load_types_for(paths) do |source_file|
         new_generator.tap{|g| g.source_file = source_file }.process({
           'templates/model.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}.go"),
-          'templates/model_store.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}_store.go"),
           'templates/model_validation.go.erb' => File.join(cfg.model_dir, "#{source_file.basename}_validation.go"),
+        })
+      end
+    end
+
+    desc "store FILE1...", "Generate store files from definition files"
+    def store(*paths)
+      setup
+      new_generator.process({
+        "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
+      })
+      load_types_for(paths) do |source_file|
+        new_generator.tap{|g| g.source_file = source_file }.process({
+          'templates/store.go.erb' => File.join(cfg.store_dir, source_file.basename, "store.go"),
+          'templates/store_validation.go.erb' => File.join(cfg.store_dir, source_file.basename, "validation.go"),
         })
       end
     end
@@ -53,12 +65,12 @@ module GoaModelGen
     def converter(*paths)
       setup
       new_generator.process({
-        "templates/converter_base.go.erb" => File.join(cfg.controller_dir, "converter_base.go"),
+        "templates/converter_base.go.erb" => File.join(cfg.converter_dir, "converter_base.go"),
       })
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
         new_generator.tap{|g| g.source_file = source_file }.process({
-          'templates/converter.go.erb' => File.join(cfg.controller_dir, "#{source_file.basename}_conv.go"),
+          'templates/converter.go.erb' => File.join(cfg.converter_dir, source_file.basename, "conv.go"),
         })
       end
     end
