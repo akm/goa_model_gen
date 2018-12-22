@@ -51,7 +51,7 @@ module GoaModelGen
     def store(*paths)
       setup
       new_generator.process({
-        "templates/goon.go.erb" => File.join(cfg.model_dir, "goon.go"),
+        "templates/goon.go.erb" => File.join(cfg.store_dir, "goon_store", "goon.go"),
       })
       load_types_for(paths) do |source_file|
         new_generator.tap{|g| g.source_file = source_file }.process({
