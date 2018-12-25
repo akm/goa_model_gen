@@ -12,7 +12,7 @@
 // 	"Book":   "Books",
 // }
 
-func GoonFromContext(c context.Context) *goon.Goon {
+func FromContext(c context.Context) *goon.Goon {
 	r := goon.FromContext(c)
 	// baseResolver := r.KindNameResolver
 	// r.KindNameResolver = func(src interface{}) string {
