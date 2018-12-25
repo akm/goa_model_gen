@@ -12,10 +12,11 @@ end
 <%- source_file.types.select(&:gen_converter?).each do |type| -%>
 <%-   if type.payload -%>
 <%-
-        import "#{config.go_package}/app"
+        import "#{config.go_package}/converters"
+        import :gen, "#{config.go_package}/gen/#{type.name.underscore}"
         import "#{config.go_package}/model"
 -%>
-func <%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
+func <%= type.name %>PayloadToModel(payload *gen.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
 	model := &model.<%= type.name %>{}
 	if err := CopyFrom<%= type.name %>PayloadToModel(payload, model); err != nil {
 		return nil, err
@@ -23,12 +24,12 @@ func <%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>) (*mod
 	return model, nil
 }
 
-func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %>, model *model.<%= type.name %>) error {
+func CopyFrom<%= type.name %>PayloadToModel(payload *gen.<%= type.payload_name %>, model *model.<%= type.name %>) error {
   if payload == nil {
-    return NoPayloadGiven
+    return converters.NoPayloadGiven
   }
   if model == nil {
-    return NoModelGiven
+    return converters.NoModelGiven
   }
 
 <%-
@@ -44,9 +45,9 @@ func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %
 <%-     if simple -%>
   model.<%= f.name %> = payload.<%= f.goa_name %>
 <%-     elsif !with_error -%>
-  model.<%= f.name %> = <%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>
+  model.<%= f.name %> = converters.<%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>
 <%-     else -%>
-  if v, err := <%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>; err != nil {
+  if v, err := converters.<%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>; err != nil {
     return err
   } else {
     model.<%= f.name %> = v
@@ -62,11 +63,11 @@ func CopyFrom<%= type.name %>PayloadToModel(payload *app.<%= type.payload_name %
 
 <%-   end -%>
 <%-   if type.media_type -%>
-func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= type.media_type_name_for_go %>, error) {
+func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*gen.<%= type.media_type_name_for_go %>, error) {
   if model == nil {
-    return nil, NoModelGiven
+    return nil, converters.NoModelGiven
   }
-  r := &app.<%= type.media_type_name_for_go %>{}
+  r := &gen.<%= type.media_type_name_for_go %>{}
 
 <%-
       type.fields_including_id.each do |f|
@@ -81,9 +82,9 @@ func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*app.<%= t
 <%-       if simple -%>
   r.<%= f.goa_name %> = model.<%= f.name %>
 <%-       elsif !with_error -%>
-  r.<%= f.goa_name %> = <%= method_calling_exp(method_name, "model.#{f.name}") %>
+  r.<%= f.goa_name %> = converters.<%= method_calling_exp(method_name, "model.#{f.name}") %>
 <%-       else -%>
-  if val, err := <%= method_calling_exp(method_name, "model.#{f.name}") %>; err != nil {
+  if val, err := converters.<%= method_calling_exp(method_name, "model.#{f.name}") %>; err != nil {
      return nil, err
   } else {
     r.<%= f.goa_name %> = val
