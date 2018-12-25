@@ -65,7 +65,7 @@ module GoaModelGen
     def converter(*paths)
       setup
       new_generator.process({
-        "templates/converter_base.go.erb" => File.join(cfg.converter_dir, "converter_base.go"),
+        "templates/converter_base.go.erb" => File.join(cfg.converter_dir, "base.go"),
       })
       load_types_for(paths) do |source_file|
         next if source_file.types.all?{|t| !t.payload && !t.media_type}
