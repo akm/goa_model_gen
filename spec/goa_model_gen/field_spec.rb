@@ -83,14 +83,14 @@ RSpec.describe GoaModelGen::Field do
             bool: 'BoolPointerToBool',
             int: 'IntPointerToInt',
             time: 'TimePointerToTime',
-          }.each do |base_type, method_name|
+          }.each do |base_type, expected_method_name|
             it base_type do
               pf = send(:"pf_#{base_type}").tap{|pf| pf.required = false}
               f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
               simple, with_error, method_name = f.payload_assignment_options(pf)
               expect(simple).to be_falsy
               expect(with_error).to be_falsy
-              expect(method_name).to eq method_name
+              expect(method_name).to eq expected_method_name
             end
           end
         end
@@ -211,14 +211,14 @@ RSpec.describe GoaModelGen::Field do
             bool: 'BoolToBoolPointer',
             int: 'IntToIntPointer',
             time: 'TimeToTimePointer',
-          }.each do |base_type, method_name|
+          }.each do |base_type, expected_method_name|
             it base_type do
               f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
               mf = send(:"mf_#{base_type}").tap{|mf| mf.required = false}
               simple, with_error, method_name = f.media_type_assignment_options(mf)
               expect(simple).to be_falsy
               expect(with_error).to be_falsy
-              expect(method_name).to eq method_name
+              expect(method_name).to eq expected_method_name
             end
           end
         end
