@@ -82,7 +82,6 @@ RSpec.describe GoaModelGen::Field do
             str: 'StringPointerToString',
             bool: 'BoolPointerToBool',
             int: 'IntPointerToInt',
-            time: 'TimePointerToTime',
           }.each do |base_type, expected_method_name|
             it base_type do
               pf = send(:"pf_#{base_type}").tap{|pf| pf.required = false}
@@ -150,13 +149,18 @@ RSpec.describe GoaModelGen::Field do
         end
 
         context "parsing" do
-          it "time.Time" do
-            pf = pf_str.tap{|pf| pf.required = true}
-            f = f_time.tap{|f| f.required = field_required}
-            simple, with_error, method_name = f.payload_assignment_options(pf)
-            expect(simple).to be_falsy
-            expect(with_error).to be_truthy
-            expect(method_name).to eq "StringToTime"
+          [
+            {pf_required: true , method_name: "StringToTime"},
+            {pf_required: false, method_name: "StringPointerToTime"},
+          ].each do |ptn|
+            it "time.Time #{ptn.inspect}" do
+              pf = pf_str.tap{|pf| pf.required = ptn[:pf_required]}
+              f = f_time.tap{|f| f.required = field_required}
+              simple, with_error, method_name = f.payload_assignment_options(pf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_truthy
+              expect(method_name).to eq ptn[:method_name]
+            end
           end
 
           it "datastore.Key" do
@@ -210,7 +214,6 @@ RSpec.describe GoaModelGen::Field do
             str: 'StringToStringPointer',
             bool: 'BoolToBoolPointer',
             int: 'IntToIntPointer',
-            time: 'TimeToTimePointer',
           }.each do |base_type, expected_method_name|
             it base_type do
               f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
@@ -278,13 +281,18 @@ RSpec.describe GoaModelGen::Field do
         end
 
         context "format" do
-          it "time.Time" do
-            f = f_time.tap{|f| f.required = field_required}
-            mf = mf_str.tap{|mf| mf.required = true}
-            simple, with_error, method_name = f.media_type_assignment_options(mf)
-            expect(simple).to be_falsy
-            expect(with_error).to be_falsy
-            expect(method_name).to eq "TimeToString"
+          [
+            {mf_required: true , method_name: "TimeToString"},
+            {mf_required: false, method_name: "TimeToStringPointer"},
+          ].each do |ptn|
+            it "time.Time #{ptn.inspect}" do
+              f = f_time.tap{|f| f.required = field_required}
+              mf = mf_str.tap{|mf| mf.required = ptn[:mf_required]}
+              simple, with_error, method_name = f.media_type_assignment_options(mf)
+              expect(simple).to be_falsy
+              expect(with_error).to be_falsy
+              expect(method_name).to eq ptn[:method_name]
+            end
           end
 
           it "datastore.Key" do
