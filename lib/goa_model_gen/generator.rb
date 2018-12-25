@@ -35,17 +35,21 @@ module GoaModelGen
     end
 
     def dependencies
-      @dependencies ||= []
+      @dependencies ||= {}
     end
 
     def clear_dependencies
       @dependencies = nil
     end
 
-    def import(*packages)
-      packages.each do |package|
-        dependencies.push(package) unless dependencies.include?(package)
+    def import(alias_or_package, package_or_nil = nil)
+      package = package_or_nil || alias_or_package
+      new_alias = package_or_nil ? alias_or_package.to_s : nil
+      if dependencies.key?(package)
+        old_alias = dependencies[package]
+        raise "Conflict alias #{old_alias.inspect} and #{new_alias.inspect}" if old_alias != new_alias
       end
+      dependencies[package] ||= new_alias
     end
 
     def user_editable(value: true)
@@ -63,6 +67,7 @@ module GoaModelGen
 
     def generate(template_path)
       clear_dependencies
+      user_editable(value: false)
 
       abs_path = File.expand_path('../' + template_path, __FILE__)
       erb = ERB.new(File.read(abs_path), nil, "-")

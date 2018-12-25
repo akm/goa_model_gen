@@ -14,7 +14,8 @@ module GoaModelGen
       swagger_yaml
       gofmt_disabled
       model_dir
-      controller_dir
+      store_dir
+      converter_dir
       validator_path
     ].freeze
 
@@ -25,7 +26,8 @@ module GoaModelGen
       @swagger_yaml   ||= "./swagger/swagger.yaml"
       @gofmt_disabled ||= false
       @model_dir      ||= "./model"
-      @controller_dir ||= "./controller"
+      @store_dir      ||= "./stores"
+      @converter_dir  ||= "./converters"
       @validator_path ||= "gopkg.in/go-playground/validator.v9"
       self
     end

@@ -20,3 +20,7 @@ func (m *Composite) PrepareToCreate() error {
 func (m *Composite) PrepareToUpdate() error {
 	return nil
 }
+
+func (m *Composite) IsPersisted() bool {
+	return m.ID != ""
+}

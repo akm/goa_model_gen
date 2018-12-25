@@ -9,7 +9,13 @@ package <%= package %>
 
 <%- unless dependencies.empty? -%>
 import (
-<%= golang_helper.partition(dependencies).map{|group| group.map{|path| "\t\"#{path}\"" }.join("\n") }.join("\n\n") %>
+<%=
+  golang_helper.partition(dependencies.keys).map do |group|
+    group.map do |path|
+      ailas_name = dependencies[path]
+      ailas_name ? "\t#{ailas_name} \"#{path}\"" : "\t\"#{path}\""
+    end.join("\n")
+  end.join("\n\n") %>
 )
 <%- end -%>
 

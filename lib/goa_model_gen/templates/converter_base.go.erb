@@ -1,11 +1,10 @@
-<%- package 'controller' -%>
+<%- package 'converters' -%>
 
 <%-
-  import(
-    "fmt",
-    "strconv",
-    "google.golang.org/appengine/datastore",
-  )
+  import "fmt"
+  import "strconv"
+  import "time"
+  import "google.golang.org/appengine/datastore"
 -%>
 
 var NoModelGiven = fmt.Errorf("No model given")
@@ -94,5 +93,25 @@ func DatastoreKeyPointerToStringPointer(key *datastore.Key) *string {
 		return nil
 	}
 	s := DatastoreKeyPointerToString(key)
+	return &s
+}
+
+func StringToTime(v string) (time.Time, error) {
+	return time.Parse(time.RFC3339, v)
+}
+
+func StringPointerToTime(v *string) (time.Time, error) {
+	if v == nil {
+		return time.Time{}, nil
+	}
+	return StringToTime(*v)
+}
+
+func TimeToString(t time.Time) string {
+	return t.Format(time.RFC3339)
+}
+
+func TimeToStringPointer(t time.Time) *string {
+	s := TimeToString(t)
 	return &s
 }

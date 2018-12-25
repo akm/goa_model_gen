@@ -101,10 +101,7 @@ module GoaModelGen
     # https://tour.golang.org/basics/11
     # https://golang.org/pkg/go/types/#pkg-variables
     SWAGGER_TYPE_TO_GOLANG_TYPE = {
-      "string" => Hash.new("string").update(
-        "date" => "time.Time",
-        "date-time" => "time.Time",
-      ),
+      "string" => Hash.new("string"),
       "number" => Hash.new("float32").update(
         "double" => "float64",
       ),
@@ -118,8 +115,13 @@ module GoaModelGen
       return format2type[format]
     end
 
+    MODEL_FUNC_NAME_FILTERS = {
+      "TimeTime" => "Time",
+    }
+
     def conv_func_part_for_model
-      conv_func_part_for(type, !!(/\A\*/ =~ type))
+      r = conv_func_part_for(type, !!(/\A\*/ =~ type))
+      MODEL_FUNC_NAME_FILTERS[r] || r
     end
 
     def conv_func_part_for_payload
