@@ -17,41 +17,41 @@ import (
 type UserStore struct {
 }
 
-func (s *UserStore) All(ctx context.Context) ([]*User, error) {
+func (s *UserStore) All(ctx context.Context) ([]*model.User, error) {
 	return s.Select(ctx, s.Query(ctx))
 }
 
-func (s *UserStore) Select(ctx context.Context, q *datastore.Query) ([]*User, error) {
-	g := GoonFromContext(ctx)
-	r := []*User{}
+func (s *UserStore) Select(ctx context.Context, q *datastore.Query) ([]*model.User, error) {
+	g := goon.FromContext(ctx)
+	r := []*model.User{}
 	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select User because of %v\n", err)
+		log.Errorf(ctx, "Failed to Select model.User because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
 }
 
 func (s *UserStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
-	g := GoonFromContext(ctx)
+	g := goon.FromContext(ctx)
 	c, err := g.Count(q)
 	if err != nil {
-		log.Errorf(ctx, "Failed to count User with %v because of %v\n", q, err)
+		log.Errorf(ctx, "Failed to count model.User with %v because of %v\n", q, err)
 		return 0, err
 	}
 	return c, nil
 }
 
 func (s *UserStore) Query(ctx context.Context) *datastore.Query {
-	g := GoonFromContext(ctx)
-	k := g.Kind(new(User))
-	// log.Infof(ctx, "Kind for User is %v\n", k)
+	g := goon.FromContext(ctx)
+	k := g.Kind(new(model.User))
+	// log.Infof(ctx, "Kind for model.User is %v\n", k)
 	return datastore.NewQuery(k)
 }
 
-func (s *UserStore) ByID(ctx context.Context, iD string) (*User, error) {
-	r := User{ID: iD}
+func (s *UserStore) ByID(ctx context.Context, iD string) (*model.User, error) {
+	r := model.User{ID: iD}
 	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
@@ -59,13 +59,13 @@ func (s *UserStore) ByID(ctx context.Context, iD string) (*User, error) {
 	return &r, nil
 }
 
-func (s *UserStore) ByKey(ctx context.Context, key *datastore.Key) (*User, error) {
+func (s *UserStore) ByKey(ctx context.Context, key *datastore.Key) (*model.User, error) {
 	if err := s.IsValidKey(ctx, key); err != nil {
 		log.Errorf(ctx, "UserStore.ByKey got Invalid key: %v because of %v\n", key, err)
 		return nil, err
 	}
 
-	r := User{ID: key.StringID()}
+	r := model.User{ID: key.StringID()}
 	err := s.Get(ctx, &r)
 	if err != nil {
 		return nil, err
@@ -73,11 +73,11 @@ func (s *UserStore) ByKey(ctx context.Context, key *datastore.Key) (*User, error
 	return &r, nil
 }
 
-func (s *UserStore) Get(ctx context.Context, m *User) error {
-	g := GoonFromContext(ctx)
+func (s *UserStore) Get(ctx context.Context, m *model.User) error {
+	g := goon.FromContext(ctx)
 	err := g.Get(m)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Get User because of %v\n", err)
+		log.Errorf(ctx, "Failed to Get model.User because of %v\n", err)
 		return err
 	}
 
@@ -88,19 +88,19 @@ func (s *UserStore) IsValidKey(ctx context.Context, key *datastore.Key) error {
 	if key == nil {
 		return fmt.Errorf("key is nil")
 	}
-	g := GoonFromContext(ctx)
-	expected := g.Kind(&User{})
+	g := goon.FromContext(ctx)
+	expected := g.Kind(&model.User{})
 	if key.Kind() != expected {
 		return fmt.Errorf("key kind must be %s but was %s", expected, key.Kind())
 	}
 	return nil
 }
 
-func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
+func (s *UserStore) Exist(ctx context.Context, m *model.User) (bool, error) {
 	if m.ID == "" {
 		return false, nil
 	}
-	g := GoonFromContext(ctx)
+	g := goon.FromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get Key of %v because of %v\n", m, err)
@@ -117,7 +117,7 @@ func (s *UserStore) Exist(ctx context.Context, m *User) (bool, error) {
 	}
 }
 
-func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error) {
+func (s *UserStore) Create(ctx context.Context, m *model.User) (*datastore.Key, error) {
 	if err := m.PrepareToCreate(); err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (s *UserStore) Create(ctx context.Context, m *User) (*datastore.Key, error)
 	})
 }
 
-func (s *UserStore) Update(ctx context.Context, m *User) (*datastore.Key, error) {
+func (s *UserStore) Update(ctx context.Context, m *model.User) (*datastore.Key, error) {
 	if err := m.PrepareToUpdate(); err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (s *UserStore) Update(ctx context.Context, m *User) (*datastore.Key, error)
 	})
 }
 
-func (s *UserStore) PutWith(ctx context.Context, m *User, f func() error) (*datastore.Key, error) {
+func (s *UserStore) PutWith(ctx context.Context, m *model.User, f func() error) (*datastore.Key, error) {
 	if err := s.Validate(ctx, m); err != nil {
 		return nil, err
 	}
@@ -164,8 +164,8 @@ func (s *UserStore) PutWith(ctx context.Context, m *User, f func() error) (*data
 	return s.Put(ctx, m)
 }
 
-func (s *UserStore) Put(ctx context.Context, m *User) (*datastore.Key, error) {
-	g := GoonFromContext(ctx)
+func (s *UserStore) Put(ctx context.Context, m *model.User) (*datastore.Key, error) {
+	g := goon.FromContext(ctx)
 	key, err := g.Put(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Put %v because of %v\n", m, err)
@@ -174,8 +174,8 @@ func (s *UserStore) Put(ctx context.Context, m *User) (*datastore.Key, error) {
 	return key, nil
 }
 
-func (s *UserStore) Delete(ctx context.Context, m *User) error {
-	g := GoonFromContext(ctx)
+func (s *UserStore) Delete(ctx context.Context, m *model.User) error {
+	g := goon.FromContext(ctx)
 	key, err := g.KeyError(m)
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get key of %v because of %v\n", m, err)
@@ -188,7 +188,7 @@ func (s *UserStore) Delete(ctx context.Context, m *User) error {
 	return nil
 }
 
-func (s *UserStore) ValidateUniqueness(ctx context.Context, m *User) error {
+func (s *UserStore) ValidateUniqueness(ctx context.Context, m *model.User) error {
 	conditions := map[string]interface{}{
 		"Email": m.Email,
 	}
