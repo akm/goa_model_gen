@@ -4,11 +4,12 @@
 package memo
 
 import (
-	"github.com/akm/goa_model_gen/project1/app"
+	"github.com/akm/goa_model_gen/project1/converters"
+	gen "github.com/akm/goa_model_gen/project1/gen/memo"
 	"github.com/akm/goa_model_gen/project1/model"
 )
 
-func MemoPayloadToModel(payload *app.MemoPayload) (*model.Memo, error) {
+func MemoPayloadToModel(payload *gen.MemoPayload) (*model.Memo, error) {
 	model := &model.Memo{}
 	if err := CopyFromMemoPayloadToModel(payload, model); err != nil {
 		return nil, err
@@ -16,35 +17,35 @@ func MemoPayloadToModel(payload *app.MemoPayload) (*model.Memo, error) {
 	return model, nil
 }
 
-func CopyFromMemoPayloadToModel(payload *app.MemoPayload, model *model.Memo) error {
+func CopyFromMemoPayloadToModel(payload *gen.MemoPayload, model *model.Memo) error {
 	if payload == nil {
-		return NoPayloadGiven
+		return converters.NoPayloadGiven
 	}
 	if model == nil {
-		return NoModelGiven
+		return converters.NoModelGiven
 	}
 
 	// Id not found in payload fields
 	// AuthorKey not found in payload fields
 	model.ContentText = payload.Content
-	model.Shared = BoolPointerToBool(payload.Shared)
+	model.Shared = converters.BoolPointerToBool(payload.Shared)
 	// CreatedAt not found in payload fields
 	// UpdatedAt not found in payload fields
 	// No model field for payload field "created_by"
 	return nil
 }
 
-func MemoModelToMediaType(model *model.Memo) (*app.Memo, error) {
+func MemoModelToMediaType(model *model.Memo) (*gen.Memo, error) {
 	if model == nil {
-		return nil, NoModelGiven
+		return nil, converters.NoModelGiven
 	}
-	r := &app.Memo{}
+	r := &gen.Memo{}
 
-	r.ID = Int64ToString(model.Id)
+	r.ID = converters.Int64ToString(model.Id)
 	// AuthorKey not found for media type field
 	r.Content = model.ContentText
 	r.Shared = model.Shared
-	r.CreatedAt = model.CreatedAt
-	r.UpdatedAt = model.UpdatedAt
+	r.CreatedAt = converters.TimeToString(model.CreatedAt)
+	r.UpdatedAt = converters.TimeToString(model.UpdatedAt)
 	return r, nil
 }

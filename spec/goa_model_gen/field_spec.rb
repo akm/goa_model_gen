@@ -65,7 +65,7 @@ RSpec.describe GoaModelGen::Field do
     [false, true].each do |field_required|
       context "model_field_required: #{field_required.inspect}" do
         context "same type" do
-          [:str, :bool, :int, :time].each do |base_type|
+          [:str, :bool, :int].each do |base_type|
             it base_type do
               pf = send(:"pf_#{base_type}").tap{|pf| pf.required = true}
               f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
@@ -150,6 +150,15 @@ RSpec.describe GoaModelGen::Field do
         end
 
         context "parsing" do
+          it "time.Time" do
+            pf = pf_str.tap{|pf| pf.required = true}
+            f = f_time.tap{|f| f.required = field_required}
+            simple, with_error, method_name = f.payload_assignment_options(pf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_truthy
+            expect(method_name).to eq "StringToTime"
+          end
+
           it "datastore.Key" do
             pf = pf_str.tap{|pf| pf.required = false}
             f = f_dskey.tap{|f| f.required = field_required}
@@ -184,7 +193,7 @@ RSpec.describe GoaModelGen::Field do
     [false, true].each do |field_required|
       context "model_field_required: #{field_required.inspect}" do
         context "same type" do
-          [:str, :bool, :int, :time].each do |base_type|
+          [:str, :bool, :int].each do |base_type|
             it base_type do
               f = send(:"f_#{base_type}").tap{|f| f.required = field_required}
               mf = send(:"mf_#{base_type}").tap{|mf| mf.required = true}
@@ -269,6 +278,15 @@ RSpec.describe GoaModelGen::Field do
         end
 
         context "format" do
+          it "time.Time" do
+            f = f_time.tap{|f| f.required = field_required}
+            mf = mf_str.tap{|mf| mf.required = true}
+            simple, with_error, method_name = f.media_type_assignment_options(mf)
+            expect(simple).to be_falsy
+            expect(with_error).to be_falsy
+            expect(method_name).to eq "TimeToString"
+          end
+
           it "datastore.Key" do
             f = f_dskey.tap{|f| f.required = field_required}
             mf = mf_str.tap{|mf| mf.required = false}

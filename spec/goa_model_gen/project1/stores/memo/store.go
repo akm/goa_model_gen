@@ -201,7 +201,7 @@ func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *model.Memo) error
 			b = 1
 		}
 		if c > b {
-			return &ValidationError{
+			return &model.ValidationError{
 				Field:   field,
 				Message: fmt.Sprintf("%v has already been taken", value),
 			}
