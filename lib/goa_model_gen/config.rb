@@ -17,6 +17,7 @@ module GoaModelGen
       store_dir
       converter_dir
       validator_path
+      generator_version_comment
     ].freeze
 
     attr_accessor *ATTRIBUTES
@@ -29,6 +30,7 @@ module GoaModelGen
       @store_dir      ||= "./stores"
       @converter_dir  ||= "./converters"
       @validator_path ||= "gopkg.in/go-playground/validator.v9"
+      @generator_version_comment ||= false
       self
     end
 
