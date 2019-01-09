@@ -105,7 +105,7 @@ module GoaModelGen
     def run(template_path, output_path, variables = {}, &block)
       content = generate(template_path, variables, &block)
 
-      if user_editable? && keep_editable
+      if user_editable? && keep_editable && File.exist?(output_path)
         $stderr.puts("%sKEEP%s %s" % [COLORS[:blue], COLORS[:clear], output_path])
         return
       end
