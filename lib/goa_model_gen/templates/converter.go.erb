@@ -7,96 +7,110 @@ def method_calling_exp(m, argument)
   end
 end
 -%>
-<%- package source_file.basename -%>
+<%- package model.name.underscore -%>
 
-<%- source_file.types.select(&:gen_converter?).each do |type| -%>
-<%-   if type.payload -%>
+<%- if payload-%>
 <%-
-        import "#{config.go_package}/converters"
-        import :gen, "#{config.go_package}/gen/#{type.name.underscore}"
-        import "#{config.go_package}/model"
+    	import "#{config.go_package}/converters"
+			import :gen, "#{config.go_package}/gen/#{model.name.underscore}"
+			import "#{config.go_package}/model"
 -%>
-func <%= type.name %>PayloadToModel(payload *gen.<%= type.payload_name %>) (*model.<%= type.name %>, error) {
-	model := &model.<%= type.name %>{}
-	if err := CopyFrom<%= type.name %>PayloadToModel(payload, model); err != nil {
+func <%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>) (*model.<%= model.name %>, error) {
+	m := &model.<%= model.name %>{}
+	if err := CopyFrom<%= model.name %>PayloadToModel(payload, m); err != nil {
 		return nil, err
 	}
-	return model, nil
+	return m, nil
 }
 
-func CopyFrom<%= type.name %>PayloadToModel(payload *gen.<%= type.payload_name %>, model *model.<%= type.name %>) error {
+func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m *model.<%= model.name %>) error {
   if payload == nil {
     return converters.NoPayloadGiven
   }
-  if model == nil {
+  if m == nil {
     return converters.NoModelGiven
   }
 
 <%-
-      type.fields_including_id.each do |f|
-      pf = type.payload.fields.detect{|pf| pf.name == f.swagger_name }
-      if pf.nil?
+      assigned_field_names = []
+      model.fields.each do |mf|
+        pf_name = (mf.tags['payload'] || mf.name).downcase
+        pf = payload.fields.detect{|pf| pf.name.downcase == pf_name }
+        assigned_field_names.push(pf.name) if pf
+        if pf.nil?
 -%>
-  // <%= f.name %> not found in payload fields
-<%-
-      else
-        simple, with_error, method_name = f.payload_assignment_options(pf)
--%>
-<%-     if simple -%>
-  model.<%= f.name %> = payload.<%= f.goa_name %>
-<%-     elsif !with_error -%>
-  model.<%= f.name %> = converters.<%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>
+  // <%= mf.name %> not found in <%= payload.name %> fields
+<%-     elsif mf.type.assignable_with?(pf.type) -%>
+  m.<%= mf.name %> = payload.<%= pf.name %>
+<%-     elsif mf.type.pointee_of?(pf.type) -%>
+  m.<%= mf.name %> = *payload.<%= pf.name %>
+<%-     elsif !pf.type.needs_error_to_convert_to?(mf.type) -%>
+  m.<%= mf.name %> = converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>)
 <%-     else -%>
-  if v, err := converters.<%= method_calling_exp(method_name, "payload.#{f.goa_name}") %>; err != nil {
+  if v, err := converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>); err != nil {
     return err
   } else {
-    model.<%= f.name %> = v
+    m.<%= mf.name %> = v
   }
 <%-     end -%>
 <%-   end -%>
-<%- end -%>
-<%- type.payload.field_diffs(type.fields_including_id.map{|f| f.swagger_name}).each do |pf| -%>
-  // No model field for payload field "<%= pf.name %>"
-<%- end -%>
+<%-
+      payload.fields.each do |pf|
+        unless assigned_field_names.include?(pf.name)
+-%>
+  // No model field in <%= model.name %> for payload field "<%= pf.name %>"
+<%-
+        end
+      end
+-%>
   return nil
 }
+<%- end -%>
 
-<%-   end -%>
-<%-   if type.media_type -%>
-func <%= type.name %>ModelToMediaType(model *model.<%= type.name %>) (*gen.<%= type.media_type_name_for_go %>, error) {
-  if model == nil {
+<%- if result -%>
+<%-
+    	import "#{config.go_package}/converters"
+			import :gen, "#{config.go_package}/gen/#{model.name.underscore}"
+			import "#{config.go_package}/model"
+-%>
+func <%= model.name %>ModelToResult(m *model.<%= model.name %>) (*gen.<%= result.name %>, error) {
+  if m == nil {
     return nil, converters.NoModelGiven
   }
-  r := &gen.<%= type.media_type_name_for_go %>{}
+  r := &gen.<%= result.name %>{}
 
 <%-
-      type.fields_including_id.each do |f|
-        mf = type.media_type.fields.detect{|mf| f.swagger_name == mf.name }
-        if mf.nil?
+      assigned_field_names = []
+      model.fields.each do |mf|
+        rf_name = (mf.tags['result'] || mf.name).downcase
+        rf = result.fields.detect{|rf| rf.name.downcase == rf_name }
+        assigned_field_names.push(rf.name) if rf
+        if rf.nil?
 -%>
-  // <%= f.name %> not found for media type field
-<%-
-        else
-          simple, with_error, method_name = f.media_type_assignment_options(mf)
--%>
-<%-       if simple -%>
-  r.<%= f.goa_name %> = model.<%= f.name %>
-<%-       elsif !with_error -%>
-  r.<%= f.goa_name %> = converters.<%= method_calling_exp(method_name, "model.#{f.name}") %>
-<%-       else -%>
-  if val, err := converters.<%= method_calling_exp(method_name, "model.#{f.name}") %>; err != nil {
-     return nil, err
+  // <%= mf.name %> not found in <%= result.name %> fields
+<%-     elsif rf.type.assignable_with?(mf.type) -%>
+  r.<%= rf.name %> = m.<%= mf.name %>
+<%-     elsif rf.type.pointer_of?(mf.type) -%>
+  r.<%= rf.name %> = &m.<%= mf.name %>
+<%-     elsif !mf.type.needs_error_to_convert_to?(rf.type) -%>
+  r.<%= rf.name %> = converters.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>)
+<%-     else -%>
+  if v, err := converters.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>); err != nil {
+    return err
   } else {
-    r.<%= f.goa_name %> = val
+    r.<%= rf.name %> = v
   }
-<%-       end
-        end -%>
+<%-     end -%>
 <%-   end -%>
-<%-   type.media_type.field_diffs(type.fields_including_id.map{|f| f.swagger_name}).each do |mf| -%>
-    // No model field for media type field "<%= mf.name %>"
-<%-   end -%>
+<%-
+      result.fields.each do |rf|
+        unless assigned_field_names.include?(rf.name)
+-%>
+    // No model field in <%= model.name %> for result field "<%= rf.name %>"
+<%-
+        end
+      end
+-%>
   return r, nil
 }
-
-<%-   end -%>
 <%- end -%>
