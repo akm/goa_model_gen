@@ -65,13 +65,18 @@ module GoaModelGen
       "datastore" => "google.golang.org/appengine/datastore",
     }
 
-    def generate(template_path)
+    def generate(template_path, variables = {})
       clear_dependencies
       user_editable(value: false)
 
       abs_path = File.expand_path('../' + template_path, __FILE__)
       erb = ERB.new(File.read(abs_path), nil, "-")
       erb.filename = abs_path
+
+      variables.each do |key, val|
+        define_singleton_method(key){ val }
+      end
+
       body = erb.result(binding).strip
 
       raise "No package given in #{abs_path}" if package.blank?
@@ -97,8 +102,8 @@ module GoaModelGen
       clear: "\e[0m",
     }
 
-    def run(template_path, output_path)
-      content = generate(template_path)
+    def run(template_path, output_path, variables = {}, &block)
+      content = generate(template_path, variables, &block)
 
       if user_editable? && keep_editable
         $stderr.puts("%sKEEP%s %s" % [COLORS[:blue], COLORS[:clear], output_path])

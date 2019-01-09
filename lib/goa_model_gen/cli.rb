@@ -1,11 +1,16 @@
+# coding: utf-8
 require "goa_model_gen"
 
+require 'json'
+
+require "active_support/core_ext/string"
 require "thor"
 
 require "goa_model_gen/logger"
 require "goa_model_gen/config"
 require "goa_model_gen/loader"
 require "goa_model_gen/generator"
+require "goa_model_gen/go_struct"
 
 module GoaModelGen
   class Cli < Thor
@@ -61,17 +66,23 @@ module GoaModelGen
       end
     end
 
-    desc "converter FILE1...", "Generate converter files from definition files and swagger.yaml"
-    def converter(*paths)
+    desc "converter FILE", "Generate converter files from definition file structs.yaml"
+    def converter(path)
       setup
       new_generator.process({
         "templates/converter_base.go.erb" => File.join(cfg.converter_dir, "base.go"),
       })
-      load_types_for(paths) do |source_file|
-        next if source_file.types.all?{|t| !t.payload && !t.media_type}
-        new_generator.tap{|g| g.source_file = source_file }.process({
-          'templates/converter.go.erb' => File.join(cfg.converter_dir, source_file.basename, "conv.go"),
-        })
+      structs = JSON.parse(File.read(path))
+      (structs['model'] || []).each do |mt|
+        m = GoStruct.new(mt)
+        pt = (structs['payload'] || []).detect{|t| t["Name"] == "#{m.name}Payload" }
+        rt = (structs['result'] || []).detect{|t| t["Name"] == m.name }
+        variables = {
+          model: m,
+          payload: pt ? GoStruct.new(pt) : nil,
+          result: rt ? GoStruct.new(rt) : nil
+        }
+        new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.name.underscore, "conv.go"), variables)
       end
     end
 
