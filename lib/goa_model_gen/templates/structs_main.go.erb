@@ -1,10 +1,13 @@
 <%-
 package 'main'
 
-user_editable true
+user_editable
 
 import "regexp"
 -%>
+
+// Usage
+// $ go run <%= config.structs_gen_dir %>/*.go
 
 func main() {
 	ptn := regexp.MustCompile(`\A<%= config.go_package  %>`)
