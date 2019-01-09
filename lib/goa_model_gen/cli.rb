@@ -66,7 +66,16 @@ module GoaModelGen
       end
     end
 
-    desc "converter FILE", "Generate converter files from definition file structs.yaml"
+    desc "structs_gen", "Generate go source files to generate structs.json"
+    def structs_gen
+      setup
+      new_generator.process({
+        "templates/structs_base.go.erb" => File.join(cfg.structs_gen_dir, "structs.go"),
+        "templates/structs_main.go.erb" => File.join(cfg.structs_gen_dir, "main.go"),
+      })
+    end
+
+    desc "converter FILE", "Generate converter files from definition file structs.json"
     def converter(path)
       setup
       new_generator.process({

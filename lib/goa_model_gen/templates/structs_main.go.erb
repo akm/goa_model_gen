@@ -1,0 +1,25 @@
+<%-
+package 'main'
+
+user_editable true
+
+import "regexp"
+-%>
+
+func main() {
+	ptn := regexp.MustCompile(`\A<%= config.go_package  %>`)
+
+	objectMap := map[string][]interface{}{
+		"model": []interface{}{
+			// model.User{},
+		},
+		"payload": []interface{}{
+			// user.UserPayload{},
+		},
+		"result": []interface{}{
+			// user.User{},
+		},
+	}
+
+	process(objectMap, ptn)
+}
