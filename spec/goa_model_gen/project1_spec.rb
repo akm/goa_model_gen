@@ -1,8 +1,11 @@
 require 'tmpdir'
 
+require 'json'
+
 require 'goa_model_gen/config'
 require 'goa_model_gen/loader'
 require 'goa_model_gen/generator'
+require 'goa_model_gen/go_struct'
 
 RSpec.describe GoaModelGen::Type do
 
@@ -77,8 +80,13 @@ RSpec.describe GoaModelGen::Type do
     end
 
     it :generate_converter do
-      generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
-      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/converters/user/conv.go')
+      structs = JSON.parse(File.read(File.expand_path('../project1/structs.json', __FILE__)))
+      variables = {
+        model: GoaModelGen::GoStruct.new(structs['model'].detect{|m| m['Name'] == 'User'}),
+        payload: nil,
+        result: nil,
+      }
+      expect(generator.generate('templates/converter.go.erb', variables)).to eq read_expected('project1/converters/user/conv.go')
     end
   end
 
@@ -108,8 +116,13 @@ RSpec.describe GoaModelGen::Type do
     end
 
     it :generate_converter do
-      generator.source_file = GoaModelGen::SourceFile.new('path/to/memo.yaml', [memo])
-      expect(generator.generate('templates/converter.go.erb')).to eq read_expected('project1/converters/memo/conv.go')
+      structs = JSON.parse(File.read(File.expand_path('../project1/structs.json', __FILE__)))
+      variables = {
+        model: GoaModelGen::GoStruct.new(structs['model'].detect{|m| m['Name'] == 'Memo'}),
+        payload: GoaModelGen::GoStruct.new(structs['payload'].detect{|m| m['Name'] == 'MemoPayload'}),
+        result: GoaModelGen::GoStruct.new(structs['result'].detect{|m| m['Name'] == 'Memo'}),
+      }
+      expect(generator.generate('templates/converter.go.erb', variables)).to eq read_expected('project1/converters/memo/conv.go')
     end
   end
 

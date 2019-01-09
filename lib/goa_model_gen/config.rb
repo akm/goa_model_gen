@@ -16,6 +16,7 @@ module GoaModelGen
       model_dir
       store_dir
       converter_dir
+      structs_gen_dir
       validator_path
       generator_version_comment
     ].freeze
@@ -29,6 +30,7 @@ module GoaModelGen
       @model_dir      ||= "./model"
       @store_dir      ||= "./stores"
       @converter_dir  ||= "./converters"
+      @structs_gen_dir ||= "./cmd/structs"
       @validator_path ||= "gopkg.in/go-playground/validator.v9"
       @generator_version_comment ||= false
       self

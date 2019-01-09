@@ -1,0 +1,266 @@
+{
+  "model": [
+
+    {
+      "Name": "Memo",
+      "Fields": [
+        {
+          "Name": "Id",
+          "Type": {
+            "Name": "int64",
+            "Kinds": [
+              "int64"
+            ],
+            "Representation": "int64"
+          }
+        },
+        {
+          "Name": "AuthorKey",
+          "Type": {
+            "PkgPath": "google.golang.org/appengine/datastore",
+            "Name": "Key",
+            "Kinds": [
+              "struct",
+              "ptr"
+            ],
+            "Representation": "*datastore.Key"
+          }
+        },
+        {
+          "Name": "ContentText",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Tag": {
+            "payload": "Content",
+            "result": "Content"
+          }
+        },
+        {
+          "Name": "Shared",
+          "Type": {
+            "Name": "bool",
+            "Kinds": [
+              "bool"
+            ],
+            "Representation": "bool"
+          }
+        },
+        {
+          "Name": "CreatedAt",
+          "Type": {
+            "PkgPath": "time",
+            "Name": "Time",
+            "Kinds": [
+              "struct"
+            ],
+            "Representation": "time.Time"
+          }
+        },
+        {
+          "Name": "UpdatedAt",
+          "Type": {
+            "PkgPath": "time",
+            "Name": "Time",
+            "Kinds": [
+              "struct"
+            ],
+            "Representation": "time.Time"
+          }
+        }
+      ]
+    },
+
+    {
+      "Name": "User",
+      "Fields": [
+        {
+          "Name": "ID",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "Email",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "AuthDomain",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "Admin",
+          "Type": {
+            "Name": "bool",
+            "Kinds": [
+              "bool"
+            ],
+            "Representation": "bool"
+          }
+        },
+        {
+          "Name": "ClientId",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "FederatedIdentity",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "FederatedProvider",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "CreatedAt",
+          "Type": {
+            "PkgPath": "time",
+            "Name": "Time",
+            "Kinds": [
+              "struct"
+            ],
+            "Representation": "time.Time"
+          }
+        },
+        {
+          "Name": "UpdatedAt",
+          "Type": {
+            "PkgPath": "time",
+            "Name": "Time",
+            "Kinds": [
+              "struct"
+            ],
+            "Representation": "time.Time"
+          }
+        }
+      ]
+    }
+  ],
+
+  "payload": [
+
+    {
+      "Name": "MemoPayload",
+      "Fields": [
+        {
+          "Name": "Content",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "Shared",
+          "Type": {
+            "Name": "bool",
+            "Kinds": [
+              "bool",
+              "ptr"
+            ],
+            "Representation": "*bool"
+          }
+        }
+      ]
+    }
+  ],
+
+  "result": [
+
+    {
+      "Name": "Memo",
+      "Fields": [
+        {
+          "Name": "ID",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "Content",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "Shared",
+          "Type": {
+            "Name": "bool",
+            "Kinds": [
+              "bool"
+            ],
+            "Representation": "bool"
+          }
+        },
+        {
+          "Name": "CreatedAt",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        },
+        {
+          "Name": "UpdatedAt",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          }
+        }
+      ]
+    }
+
+  ]
+}
