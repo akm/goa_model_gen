@@ -43,7 +43,9 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
 <%-     elsif mf.type.assignable_with?(pf.type) -%>
   m.<%= mf.name %> = payload.<%= pf.name %>
 <%-     elsif mf.type.pointee_of?(pf.type) -%>
-  m.<%= mf.name %> = *payload.<%= pf.name %>
+  if payload.<%= pf.name %> != nil {
+    m.<%= mf.name %> = *payload.<%= pf.name %>
+  }
 <%-     elsif !pf.type.needs_error_to_convert_to?(mf.type) -%>
   m.<%= mf.name %> = converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>)
 <%-     else -%>
