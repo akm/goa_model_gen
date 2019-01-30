@@ -6,11 +6,45 @@ import (
 	"time"
 )
 
+type UserType int
+
+const (
+	UserTypeViewer        UserType = 0
+	UserTypeWriter        UserType = 1
+	UserTypeAdministrator UserType = 2
+)
+
+var UserTypeMap = map[UserType]string{
+	0: "viewer",
+	1: "writer",
+	2: "administrator",
+}
+
+func (t UserType) String() string {
+	return UserTypeMap[t]
+}
+
+var UserTypeNameToValue = map[string]UserType{
+	"viewer":        0,
+	"writer":        1,
+	"administrator": 2,
+}
+
+func ParseUserType(s string) *UserType {
+	val, ok := UserTypeNameToValue[s]
+	if ok {
+		return &val
+	} else {
+		return nil
+	}
+}
+
 type User struct {
 	ID                string    `datastore:"-" goon:"id" json:"id"`
 	Email             string    `json:"email" validate:"required,email"`
 	AuthDomain        string    `json:"auth_domain,omitempty"`
 	Admin             bool      `json:"admin,omitempty"`
+	UserType          UserType  `json:"user_type" validate:"required"`
 	ClientId          string    `json:"client_id,omitempty"`
 	FederatedIdentity string    `json:"federated_identity,omitempty"`
 	FederatedProvider string    `json:"federated_provider,omitempty"`
