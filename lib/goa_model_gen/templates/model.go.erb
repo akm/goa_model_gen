@@ -29,6 +29,41 @@ const (
 <%-       end -%>
 )
 <%-     end -%>
+
+<%-     if type.enum_map -%>
+const (
+<%-       type.enum_map.each do |key, name| -%>
+  <%= type.name %><%= name.camelize %> <%= type.name %> = <%= key.inspect %>
+<%-       end -%>
+)
+
+var <%= type.name %>Map = map[<%= type.name %>]string{
+<%-       type.enum_map.each do |key, name| -%>
+  <%= key.inspect %>: <%= name.inspect %>,
+<%-       end -%>
+}
+
+func (t <%= type.name %>) String() string {
+  return <%= type.name %>Map[t]
+}
+
+var <%= type.name %>NameToValue = map[string]<%= type.name %>{
+<%-       type.enum_map.each do |key, name| -%>
+  <%= name.inspect %>: <%= key.inspect %>,
+<%-       end -%>
+}
+
+func Parse<%= type.name %>(s string) *<%= type.name %> {
+  val, ok := <%= type.name %>NameToValue[s]
+  if ok {
+    return &val
+  } else {
+    return nil
+  }
+}
+
+<%-     end -%>
+
 <%-   end -%>
 
 <%- end -%>

@@ -27,7 +27,9 @@ func CopyFromMemoPayloadToModel(payload *gen.MemoPayload, m *model.Memo) error {
 	// Id not found in MemoPayload fields
 	// AuthorKey not found in MemoPayload fields
 	m.ContentText = payload.Content
-	m.Shared = *payload.Shared
+	if payload.Shared != nil {
+		m.Shared = *payload.Shared
+	}
 	// CreatedAt not found in MemoPayload fields
 	// UpdatedAt not found in MemoPayload fields
 	return nil

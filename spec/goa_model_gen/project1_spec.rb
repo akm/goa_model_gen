@@ -28,6 +28,7 @@ RSpec.describe GoaModelGen::Type do
   let(:source_files){ loader.load_files(model_yamls) }
   let(:types){ source_files.map(&:types).flatten }
 
+  let(:user_type){ types.detect{|t| t.name == "UserType"} }
   let(:user){ types.detect{|t| t.name == "User"} }
   let(:memo){ types.detect{|t| t.name == "Memo"} }
   let(:component1){ types.detect{|t| t.name == "Component1"} }
@@ -72,7 +73,11 @@ RSpec.describe GoaModelGen::Type do
     end
 
     it :generate_model do
-      generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
+      generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user_type, user])
+
+      puts "user.yaml"
+      puts YAML.dump(generator.source_file.types)
+
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/user.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/user_validation.go')
       expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/user/store.go')

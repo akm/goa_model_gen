@@ -33,6 +33,7 @@ module GoaModelGen
 
   class Model < Type
     attr_reader :enum_items, :enum_path
+    attr_reader :enum_map
     attr_reader :payload, :media_type
     attr_reader :payload_name, :media_type_name
     attr_reader :goon
@@ -43,6 +44,7 @@ module GoaModelGen
       super(name, attrs)
       @base = attrs['base']
       @enum_path = attrs['enum']
+      @enum_map = attrs['enum_map']
       @goon = attrs['goon']
       @payload_name = check_blank(attrs['payload']){ store? ? "#{@name}Payload" : @name }
       @media_type_name = check_blank(attrs['media_type']){ @name }

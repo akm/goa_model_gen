@@ -7,6 +7,12 @@ anchors:
   required: true
 
 types:
+  UserType:
+    base: int
+    enum_map:
+      0: viewer
+      1: writer
+      2: administrator
   User:
     goon:
       # id_type: int64
@@ -23,6 +29,9 @@ types:
         validation: email
       AuthDomain: string
       Admin: bool
+      UserType:
+        type: UserType
+        required: true
       # ID:  string
       ClientId:
         type: string
