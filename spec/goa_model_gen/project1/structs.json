@@ -119,6 +119,18 @@
           }
         },
         {
+          "Name": "UserType",
+          "Type": {
+            "PkgPath": "path/to/admin/model",
+            "Name": "UserType",
+            "Kinds": [
+              "int"
+            ],
+            "Representation": "model.UserType"
+          },
+          "Anonymous": false
+        },
+        {
           "Name": "ClientId",
           "Type": {
             "Name": "string",
@@ -201,6 +213,65 @@
           }
         }
       ]
+    },
+
+    {
+      "Name": "UserPayload",
+      "Fields": [
+        {
+          "Name": "Email",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "AuthDomain",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "RawTag": "json:\"auth_domain,omitempty\"",
+          "Tag": {
+            "json": "auth_domain,omitempty"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "Admin",
+          "Type": {
+            "Name": "bool",
+            "Kinds": [
+              "bool"
+            ],
+            "Representation": "bool"
+          },
+          "RawTag": "json:\"admin,omitempty\"",
+          "Tag": {
+            "json": "admin,omitempty"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "UserType",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string",
+              "ptr"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
+        }
+      ]
     }
   ],
 
@@ -258,6 +329,68 @@
             ],
             "Representation": "string"
           }
+        }
+      ]
+    },
+
+    {
+      "Name": "User",
+      "Size": 104,
+      "Fields": [
+        {
+          "Name": "ID",
+          "Type": {
+            "Name": "int64",
+            "Kinds": [
+              "int64"
+            ],
+            "Representation": "int64"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "Email",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "UserType",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "CreatedAt",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
+        },
+        {
+          "Name": "UpdatedAt",
+          "Type": {
+            "Name": "string",
+            "Kinds": [
+              "string"
+            ],
+            "Representation": "string"
+          },
+          "Anonymous": false
         }
       ]
     }

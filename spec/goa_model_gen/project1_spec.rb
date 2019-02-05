@@ -88,8 +88,8 @@ RSpec.describe GoaModelGen::Type do
       structs = JSON.parse(File.read(File.expand_path('../project1/structs.json', __FILE__)))
       variables = {
         model: GoaModelGen::GoStruct.new(structs['model'].detect{|m| m['Name'] == 'User'}),
-        payload: nil,
-        result: nil,
+        payload: GoaModelGen::GoStruct.new(structs['payload'].detect{|m| m['Name'] == 'UserPayload'}),
+        result: GoaModelGen::GoStruct.new(structs['result'].detect{|m| m['Name'] == 'User'}),
       }
       expect(generator.generate('templates/converter.go.erb', variables)).to eq read_expected('project1/converters/user/conv.go')
     end
