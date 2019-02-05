@@ -69,5 +69,9 @@ module GoaModelGen
           [name] + parts[1..-1] : parts
       parts.map(&:camelize).join
     end
+
+    def defined_in_model?
+      pkg_path =~ /\/model\z/
+    end
   end
 end

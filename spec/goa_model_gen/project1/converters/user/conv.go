@@ -29,7 +29,7 @@ func CopyFromUserPayloadToModel(payload *gen.UserPayload, m *model.User) error {
 	m.AuthDomain = payload.AuthDomain
 	m.Admin = payload.Admin
 	if payload.UserType != nil {
-		if v, err := converters.StringToUserType(*payload.UserType); err != nil {
+		if v, err := model.StringToUserType(*payload.UserType); err != nil {
 			return err
 		} else {
 			m.UserType = v
