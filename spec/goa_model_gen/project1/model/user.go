@@ -40,6 +40,10 @@ func StringToUserType(s string) (UserType, error) {
 	}
 }
 
+func UserTypeToString(v UserType) string {
+	return v.String()
+}
+
 type User struct {
 	ID                string    `datastore:"-" goon:"id" json:"id"`
 	Email             string    `json:"email" validate:"required,email"`

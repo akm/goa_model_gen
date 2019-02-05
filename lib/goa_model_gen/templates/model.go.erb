@@ -63,6 +63,11 @@ func StringTo<%= type.name %>(s string) (<%= type.name %>, error) {
   }
 }
 
+
+func <%= type.name %>ToString(v <%= type.name %>) string {
+  return v.String()
+}
+
 <%-     end -%>
 
 <%-   end -%>
