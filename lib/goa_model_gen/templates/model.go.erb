@@ -58,7 +58,7 @@ func StringTo<%= type.name %>(s string) (<%= type.name %>, error) {
   if ok {
     return val, nil
   } else {
-    err := convertors.InvalidEnumName{Name: s}
+    err := InvalidEnumName{Name: s}
     return <%= type.name %><%= type.enum_map[type.enum_map.keys.first].camelize %>, err
   }
 }

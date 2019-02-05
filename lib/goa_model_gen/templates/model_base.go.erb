@@ -1,0 +1,11 @@
+<%- user_editable -%>
+<%- package "model" -%>
+
+type InvalidEnumName struct {
+  Name string
+  // Options []string
+}
+
+func (e *InvalidEnumName) Error() string {
+  return fmt.Sprintf("Invalid enum name %q", e.Name)
+}

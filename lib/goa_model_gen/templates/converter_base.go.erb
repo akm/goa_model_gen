@@ -11,15 +11,6 @@ var NoModelGiven = fmt.Errorf("No model given")
 var NoPayloadGiven = fmt.Errorf("No payload given")
 var NoMediaTypeGiven = fmt.Errorf("No media type given")
 
-type InvalidEnumName struct {
-  Name string
-  // Options []string
-}
-
-func (e *InvalidEnumName) Error() {
-  return fmt.Sprintf("Invalid enum name %q", e.Name)
-}
-
 func BoolPointerToBool(v *bool) bool {
 	return BoolPointerToBoolWith(v, false)
 }
