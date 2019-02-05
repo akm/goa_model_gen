@@ -53,13 +53,19 @@ var <%= type.name %>NameToValue = map[string]<%= type.name %>{
 <%-       end -%>
 }
 
-func Parse<%= type.name %>(s string) *<%= type.name %> {
+func StringTo<%= type.name %>(s string) (<%= type.name %>, error) {
   val, ok := <%= type.name %>NameToValue[s]
   if ok {
-    return &val
+    return val, nil
   } else {
-    return nil
+    err := &InvalidEnumName{Name: s}
+    return <%= type.name %><%= type.enum_map[type.enum_map.keys.first].camelize %>, err
   }
+}
+
+
+func <%= type.name %>ToString(v <%= type.name %>) string {
+  return v.String()
 }
 
 <%-     end -%>
