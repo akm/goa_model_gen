@@ -43,6 +43,9 @@ module GoaModelGen
     end
     alias_method :assignable_with?, :==
 
+    def pointer?
+      kinds.last == 'ptr'
+    end
     def pointer_of?(other)
       (pkg_path == other.pkg_path) &&
         (name == other.name) &&
@@ -59,9 +62,11 @@ module GoaModelGen
     end
 
     def method_part_name
+      parts = kinds.dup
+      parts.pop if parts.last == 'ptr'
       parts =
-        kinds.first == 'struct' ?
-          [name] + kinds[1..-1] : kinds
+        (parts.first == 'struct' || pkg_path.present?) ?
+          [name] + parts[1..-1] : parts
       parts.map(&:camelize).join
     end
   end

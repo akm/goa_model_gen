@@ -49,11 +49,18 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
 <%-     elsif !pf.type.needs_error_to_convert_to?(mf.type) -%>
   m.<%= mf.name %> = converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>)
 <%-     else -%>
-  if v, err := converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>); err != nil {
+<%-       meth = "#{pf.type.method_part_name}To#{mf.type.method_part_name}" -%>
+<%-       if pf.type.pointer? -%>
+  if payload.<%= pf.name %> != nil {
+<%-       end -%>
+  if v, err := converters.<%= meth %>(<%= '*' if pf.type.pointer? %>payload.<%= pf.name %>); err != nil {
     return err
   } else {
     m.<%= mf.name %> = v
   }
+<%-       if pf.type.pointer? -%>
+  }
+<%-       end -%>
 <%-     end -%>
 <%-   end -%>
 <%-
