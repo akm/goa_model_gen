@@ -35,7 +35,7 @@ func StringToUserType(s string) (UserType, error) {
 	if ok {
 		return val, nil
 	} else {
-		err := InvalidEnumName{Name: s}
+		err := &InvalidEnumName{Name: s}
 		return UserTypeViewer, err
 	}
 }
