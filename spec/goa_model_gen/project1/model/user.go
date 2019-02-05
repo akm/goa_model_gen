@@ -30,12 +30,13 @@ var UserTypeNameToValue = map[string]UserType{
 	"administrator": 2,
 }
 
-func ParseUserType(s string) *UserType {
+func StringToUserType(s string) (UserType, error) {
 	val, ok := UserTypeNameToValue[s]
 	if ok {
-		return &val
+		return val, nil
 	} else {
-		return nil
+		err := convertors.InvalidEnumName{Name: s}
+		return UserTypeViewer, err
 	}
 }
 

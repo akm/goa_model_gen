@@ -65,7 +65,7 @@ RSpec.describe GoaModelGen::Type do
       Dir.mktmpdir do |dir|
         thor = double(:thor)
         path = File.join(dir, 'user.go')
-        generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user])
+        generator.source_file = GoaModelGen::SourceFile.new('path/to/user.yaml', [user_type, user])
         generator.thor = thor
         expect(thor).to receive(:create_file).with(path, read_expected('project1/model/user.go'), {skip: false, force: false})
         generator.run('templates/model.go.erb', path)
