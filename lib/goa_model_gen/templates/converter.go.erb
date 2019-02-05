@@ -37,6 +37,7 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
         pf_name = (mf.tags['payload'] || mf.name).downcase
         pf = payload.fields.detect{|pf| pf.name.downcase == pf_name }
         assigned_field_names.push(pf.name) if pf
+        conv_pkg = mf.type.defined_in_model? ? 'model' : 'converters'
         if pf.nil?
 -%>
   // <%= mf.name %> not found in <%= payload.name %> fields
@@ -47,13 +48,13 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
     m.<%= mf.name %> = *payload.<%= pf.name %>
   }
 <%-     elsif !pf.type.needs_error_to_convert_to?(mf.type) -%>
-  m.<%= mf.name %> = converters.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>)
+  m.<%= mf.name %> = <%= conv_pkg %>.<%= pf.type.method_part_name %>To<%= mf.type.method_part_name %>(payload.<%= pf.name %>)
 <%-     else -%>
-<%-       meth = "#{mf.type.defined_in_model? ? 'model' : 'converters' }.#{pf.type.method_part_name}To#{mf.type.method_part_name}" -%>
+<%-       meth = "#{pf.type.method_part_name}To#{mf.type.method_part_name}" -%>
 <%-       if pf.type.pointer? -%>
   if payload.<%= pf.name %> != nil {
 <%-       end -%>
-  if v, err := <%= meth %>(<%= '*' if pf.type.pointer? %>payload.<%= pf.name %>); err != nil {
+  if v, err := <%= conv_pkg %>.<%= meth %>(<%= '*' if pf.type.pointer? %>payload.<%= pf.name %>); err != nil {
     return err
   } else {
     m.<%= mf.name %> = v
@@ -94,6 +95,7 @@ func <%= model.name %>ModelToResult(m *model.<%= model.name %>) (*gen.<%= result
         rf_name = (mf.tags['result'] || mf.name).downcase
         rf = result.fields.detect{|rf| rf.name.downcase == rf_name }
         assigned_field_names.push(rf.name) if rf
+        conv_pkg = mf.type.defined_in_model? ? 'model' : 'converters'
         if rf.nil?
 -%>
   // <%= mf.name %> not found in <%= result.name %> fields
@@ -102,9 +104,10 @@ func <%= model.name %>ModelToResult(m *model.<%= model.name %>) (*gen.<%= result
 <%-     elsif rf.type.pointer_of?(mf.type) -%>
   r.<%= rf.name %> = &m.<%= mf.name %>
 <%-     elsif !mf.type.needs_error_to_convert_to?(rf.type) -%>
-  r.<%= rf.name %> = converters.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>)
+  r.<%= rf.name %> = <%= conv_pkg %>.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>)
 <%-     else -%>
-  if v, err := converters.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>); err != nil {
+<%-       meth = "#{mf.type.method_part_name}To#{rf.type.method_part_name}" -%>
+  if v, err := <%= conv_pkg %>.<%= meth %>(m.<%= mf.name %>); err != nil {
     return err
   } else {
     r.<%= rf.name %> = v

@@ -57,7 +57,7 @@ func UserModelToResult(m *model.User) (*gen.User, error) {
 	r.Email = m.Email
 	// AuthDomain not found in User fields
 	// Admin not found in User fields
-	r.UserType = converters.UserTypeToString(m.UserType)
+	r.UserType = model.UserTypeToString(m.UserType)
 	// ClientId not found in User fields
 	// FederatedIdentity not found in User fields
 	// FederatedProvider not found in User fields
