@@ -114,8 +114,8 @@ module GoaModelGen
       thor.create_file(output_path, content, options)
     end
 
-    def process(temp_path_to_dest_path)
-      temp_path_to_dest_path.each{|src, dest| run(src, dest) }
+    def process(temp_path_to_dest_path, variables = {}, &block)
+      temp_path_to_dest_path.each{|src, dest| run(src, dest, variables, &block) }
     end
   end
 end

@@ -78,10 +78,14 @@ RSpec.describe GoaModelGen::Type do
       puts "user.yaml"
       puts YAML.dump(generator.source_file.types)
 
+      variables = {
+        model: user,
+        model_basename: 'user',
+      }
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/user.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/user_validation.go')
-      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/user/store.go')
-      expect(generator.generate('templates/store_validation.go.erb')).to eq read_expected('project1/stores/user/validation.go')
+      expect(generator.generate('templates/store.go.erb', variables)).to eq read_expected('project1/stores/user/store.go')
+      expect(generator.generate('templates/store_validation.go.erb', variables)).to eq read_expected('project1/stores/user/validation.go')
     end
 
     it :generate_converter do
@@ -113,11 +117,15 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('UpdatedAt').definition).to eq 'UpdatedAt time.Time `json:"updated_at" validate:"required"`'}
 
     it :generate_model do
+      variables = {
+        model: memo,
+        model_basename: 'memo',
+      }
       generator.source_file = GoaModelGen::SourceFile.new('path/to/memo.yaml', [memo])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/memo.go')
       expect(generator.generate('templates/model_validation.go.erb')). to eq read_expected('project1/model/memo_validation.go')
-      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/memo/store.go')
-      expect(generator.generate('templates/store_validation.go.erb')).to eq read_expected('project1/stores/memo/validation.go')
+      expect(generator.generate('templates/store.go.erb', variables)).to eq read_expected('project1/stores/memo/store.go')
+      expect(generator.generate('templates/store_validation.go.erb', variables)).to eq read_expected('project1/stores/memo/validation.go')
     end
 
     it :generate_converter do
@@ -146,8 +154,8 @@ RSpec.describe GoaModelGen::Type do
       generator.source_file = GoaModelGen::SourceFile.new('path/to/component1_only.yaml', [component1])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/component1_only.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/component1_only_validation.go')
-      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/component1_only/store.go')
-      expect(generator.generate('templates/store_validation.go.erb')).to eq read_expected('project1/stores/component1_only/validation.go')
+      # expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/component1_only/store.go')
+      # expect(generator.generate('templates/store_validation.go.erb')).to eq read_expected('project1/stores/component1_only/validation.go')
     end
   end
 
@@ -166,11 +174,15 @@ RSpec.describe GoaModelGen::Type do
     it{ expect(subject.field_by('Components').definition).to eq 'Components []Component1 `json:"components,omitempty"`'}
 
     it :generate do
+      variables = {
+        model: composite,
+        model_basename: 'composite',
+      }
       generator.source_file = GoaModelGen::SourceFile.new('path/to/composite.yaml', [component1, composite])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/composite.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/composite_validation.go')
-      expect(generator.generate('templates/store.go.erb')).to eq read_expected('project1/stores/composite/store.go')
-      expect(generator.generate('templates/store_validation.go.erb')).to eq read_expected('project1/stores/composite/validation.go')
+      expect(generator.generate('templates/store.go.erb', variables)).to eq read_expected('project1/stores/composite/store.go')
+      expect(generator.generate('templates/store_validation.go.erb', variables)).to eq read_expected('project1/stores/composite/validation.go')
     end
   end
 

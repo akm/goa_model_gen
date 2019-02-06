@@ -1,6 +1,5 @@
-<%- package source_file.basename -%>
+<%- package model_basename -%>
 
-<%- source_file.types.select(&:store?).each do |model| -%>
 <%-	 store_name = "#{model.name}Store" -%>
 <%-
 			import "context"
@@ -260,5 +259,3 @@ func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *<%= model
 	}
 	return nil
 }
-
-<%- end -%>
