@@ -60,10 +60,18 @@ module GoaModelGen
         "templates/goon.go.erb" => File.join(cfg.store_dir, "goon_store", "goon.go"),
       })
       load_types_for(paths) do |source_file|
-        new_generator.tap{|g| g.source_file = source_file }.process({
-          'templates/store.go.erb' => File.join(cfg.store_dir, source_file.basename, "store.go"),
-          'templates/store_validation.go.erb' => File.join(cfg.store_dir, source_file.basename, "validation.go"),
-        })
+        source_file.types.select(&:store?).each do |model|
+          basename = model.name.underscore
+          variables = {
+            model: model,
+            model_basename: basename,
+          }
+
+          new_generator.tap{|g| g.source_file = source_file }.process({
+            'templates/store.go.erb' => File.join(cfg.store_dir, basename, "store.go"),
+            'templates/store_validation.go.erb' => File.join(cfg.store_dir, basename, "validation.go"),
+          }, variables)
+        end
       end
     end
 

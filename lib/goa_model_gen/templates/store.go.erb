@@ -1,6 +1,5 @@
-<%- package source_file.basename -%>
+<%- package model_basename -%>
 
-<%- source_file.types.select(&:store?).each do |model| -%>
 <%-	 store_name = "#{model.name}Store" -%>
 <%-
 			import "context"
@@ -12,7 +11,14 @@
 
       model_name = "model.#{model.name}"
 -%>
+type <%= store_name %>Binder interface {
+	Query(q *datastore.Query) *datastore.Query
+	Visible(m *model.<%= model.name %>) bool
+	Prepare(m *model.<%= model.name %>)
+}
+
 type <%= store_name %> struct{
+	Binder <%= store_name %>Binder
 <%- if model.parent -%>
 	ParentKey *datastore.Key
 <%- end -%>
@@ -48,7 +54,11 @@ func (s *<%= store_name %>) Query(ctx context.Context) *datastore.Query {
 	g := goon.FromContext(ctx)
 	k := g.Kind(new(<%= model_name %>))
 	// log.Infof(ctx, "Kind for <%= model_name %> is %v\n", k)
-	return datastore.NewQuery(k)
+	q := datastore.NewQuery(k)
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
 }
 
 func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model_name %>, error) {
@@ -70,16 +80,7 @@ func (s *<%= store_name %>) ByKey(ctx context.Context, key *datastore.Key) (*<%=
 		return nil, err
 	}
 
-<%- if model.parent -%>
-	r := <%= model_name %>{ParentKey: key.Parent(), <%= model.id_name %>: key.<%= model.key_id_method %>()}
-<%- else -%>
-	r := <%= model_name %>{<%= model.id_name %>: key.<%= model.key_id_method %>()}
-<%- end -%>
-	err := s.Get(ctx, &r)
-	if err != nil {
-		return nil, err
-	}
-	return &r, nil
+	return s.ByID(ctx, key.IntID())
 }
 
 func (s *<%= store_name %>) Get(ctx context.Context, m *<%= model_name %>) error {
@@ -96,7 +97,11 @@ func (s *<%= store_name %>) Get(ctx context.Context, m *<%= model_name %>) error
 	}
 <%- end -%>
 
-	return nil
+	if s.Binder != nil && !s.Binder.Visible(m) {
+		return datastore.ErrNoSuchEntity
+	}
+
+  return nil
 }
 
 func (s *<%= store_name %>) IsValidKey(ctx context.Context, key *datastore.Key) error {
@@ -172,6 +177,9 @@ func (s *<%= store_name %>) Update(ctx context.Context, m *<%= model_name %>) (*
 }
 
 func (s *<%= store_name %>) PutWith(ctx context.Context, m *<%= model_name %>, f func() error) (*datastore.Key, error) {
+	if s.Binder != nil {
+		s.Binder.Prepare(m)
+	}
 	if err := s.Validate(ctx, m); err != nil {
 		return nil, err
 	}
@@ -260,5 +268,3 @@ func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *<%= model
 	}
 	return nil
 }
-
-<%- end -%>

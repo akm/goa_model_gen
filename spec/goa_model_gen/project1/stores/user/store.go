@@ -13,7 +13,14 @@ import (
 	goon "github.com/akm/goa_model_gen/project1/stores/goon_store"
 )
 
+type UserStoreBinder interface {
+	Query(q *datastore.Query) *datastore.Query
+	Visible(m *model.User) bool
+	Prepare(m *model.User)
+}
+
 type UserStore struct {
+	Binder UserStoreBinder
 }
 
 func (s *UserStore) All(ctx context.Context) ([]*model.User, error) {
@@ -46,7 +53,11 @@ func (s *UserStore) Query(ctx context.Context) *datastore.Query {
 	g := goon.FromContext(ctx)
 	k := g.Kind(new(model.User))
 	// log.Infof(ctx, "Kind for model.User is %v\n", k)
-	return datastore.NewQuery(k)
+	q := datastore.NewQuery(k)
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
 }
 
 func (s *UserStore) ByID(ctx context.Context, iD string) (*model.User, error) {
@@ -64,12 +75,7 @@ func (s *UserStore) ByKey(ctx context.Context, key *datastore.Key) (*model.User,
 		return nil, err
 	}
 
-	r := model.User{ID: key.StringID()}
-	err := s.Get(ctx, &r)
-	if err != nil {
-		return nil, err
-	}
-	return &r, nil
+	return s.ByID(ctx, key.IntID())
 }
 
 func (s *UserStore) Get(ctx context.Context, m *model.User) error {
@@ -78,6 +84,10 @@ func (s *UserStore) Get(ctx context.Context, m *model.User) error {
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get model.User because of %v\n", err)
 		return err
+	}
+
+	if s.Binder != nil && !s.Binder.Visible(m) {
+		return datastore.ErrNoSuchEntity
 	}
 
 	return nil
@@ -151,6 +161,9 @@ func (s *UserStore) Update(ctx context.Context, m *model.User) (*datastore.Key, 
 }
 
 func (s *UserStore) PutWith(ctx context.Context, m *model.User, f func() error) (*datastore.Key, error) {
+	if s.Binder != nil {
+		s.Binder.Prepare(m)
+	}
 	if err := s.Validate(ctx, m); err != nil {
 		return nil, err
 	}

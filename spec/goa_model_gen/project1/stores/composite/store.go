@@ -14,7 +14,14 @@ import (
 	"github.com/goadesign/goa/uuid"
 )
 
+type CompositeStoreBinder interface {
+	Query(q *datastore.Query) *datastore.Query
+	Visible(m *model.Composite) bool
+	Prepare(m *model.Composite)
+}
+
 type CompositeStore struct {
+	Binder CompositeStoreBinder
 }
 
 func (s *CompositeStore) All(ctx context.Context) ([]*model.Composite, error) {
@@ -47,7 +54,11 @@ func (s *CompositeStore) Query(ctx context.Context) *datastore.Query {
 	g := goon.FromContext(ctx)
 	k := g.Kind(new(model.Composite))
 	// log.Infof(ctx, "Kind for model.Composite is %v\n", k)
-	return datastore.NewQuery(k)
+	q := datastore.NewQuery(k)
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
 }
 
 func (s *CompositeStore) ByID(ctx context.Context, id string) (*model.Composite, error) {
@@ -65,12 +76,7 @@ func (s *CompositeStore) ByKey(ctx context.Context, key *datastore.Key) (*model.
 		return nil, err
 	}
 
-	r := model.Composite{Id: key.StringID()}
-	err := s.Get(ctx, &r)
-	if err != nil {
-		return nil, err
-	}
-	return &r, nil
+	return s.ByID(ctx, key.IntID())
 }
 
 func (s *CompositeStore) Get(ctx context.Context, m *model.Composite) error {
@@ -79,6 +85,10 @@ func (s *CompositeStore) Get(ctx context.Context, m *model.Composite) error {
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get model.Composite because of %v\n", err)
 		return err
+	}
+
+	if s.Binder != nil && !s.Binder.Visible(m) {
+		return datastore.ErrNoSuchEntity
 	}
 
 	return nil
@@ -152,6 +162,9 @@ func (s *CompositeStore) Update(ctx context.Context, m *model.Composite) (*datas
 }
 
 func (s *CompositeStore) PutWith(ctx context.Context, m *model.Composite, f func() error) (*datastore.Key, error) {
+	if s.Binder != nil {
+		s.Binder.Prepare(m)
+	}
 	if err := s.Validate(ctx, m); err != nil {
 		return nil, err
 	}
