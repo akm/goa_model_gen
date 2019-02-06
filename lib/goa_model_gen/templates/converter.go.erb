@@ -6,13 +6,16 @@ def method_calling_exp(m, argument)
     "#{m}(#{argument})"
   end
 end
+
+gen_package = "#{config.go_package}/gen/#{model.name.underscore}"
+
 -%>
 <%- package model.name.underscore -%>
 
 <%- if payload-%>
 <%-
     	import "#{config.go_package}/converters"
-			import :gen, "#{config.go_package}/gen/#{model.name.underscore}"
+			import :gen, gen_package
 			import "#{config.go_package}/model"
 -%>
 func <%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>) (*model.<%= model.name %>, error) {
@@ -80,9 +83,36 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
 <%- if result -%>
 <%-
     	import "#{config.go_package}/converters"
-			import :gen, "#{config.go_package}/gen/#{model.name.underscore}"
+			import :gen, gen_package
 			import "#{config.go_package}/model"
+
+      indirect_types =
+        result.fields.map{|rf| rf.type.pkg_path == gen_package ? rf.type : nil }.
+        compact.uniq{|rft| "#{rft.pkg_path}.#{rft.name}" }
+      indirect_type_names = indirect_types.map(&:name)
+
+      indirect_types.each do |rft|
+        mt_hash = models.detect{|t| t['Name'] == rft.name} || raise("model not found for #{rft.name}")
+        rt_hash = results.detect{|rt| (rt['PkgPath'] == gen_package) && (rt['Name'] == rft.name)} || raise("#{gen_package}.#{rft.name} not found in structs")
+        mt = GoStruct.new(mt_hash)
+        rt = GoStruct.new(rt_hash)
 -%>
+func <%= rt.name %>ModelToResult(m *model.<%= rt.name %>) *gen.<%= rt.name %> {
+  return &gen.<%= rt.name %> {
+<%-
+        rt.fields.each do |rf|
+          mf = mt.fields.detect{|f| f.name == rf.name}
+          if mf && mf.type.assignable_with?(rf.type)
+-%>
+            <%= rf.name %>: m.<%= mf.name %>,
+<%-
+          end
+        end
+-%>
+  }
+}
+
+<%-   end -%>
 func <%= model.name %>ModelToResult(m *model.<%= model.name %>) (*gen.<%= result.name %>, error) {
   if m == nil {
     return nil, converters.NoModelGiven
@@ -103,6 +133,8 @@ func <%= model.name %>ModelToResult(m *model.<%= model.name %>) (*gen.<%= result
   r.<%= rf.name %> = m.<%= mf.name %>
 <%-     elsif rf.type.pointer_of?(mf.type) -%>
   r.<%= rf.name %> = &m.<%= mf.name %>
+<%-     elsif indirect_type_names.include?(rf.type.name) -%>
+  r.<%= rf.name %> = <%= rf.type.name %>ModelToResult(&m.<%= mf.name %>)
 <%-     elsif !mf.type.needs_error_to_convert_to?(rf.type) -%>
   r.<%= rf.name %> = <%= conv_pkg %>.<%= mf.type.method_part_name %>To<%= rf.type.method_part_name %>(m.<%= mf.name %>)
 <%-     else -%>

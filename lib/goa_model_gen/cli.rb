@@ -88,9 +88,12 @@ module GoaModelGen
         pt = (structs['payload'] || []).detect{|t| t["Name"] == "#{m.name}Payload" }
         rt = (structs['result'] || []).detect{|t| t["Name"] == m.name }
         variables = {
+          models: (structs['model'] || []),
+          payloads: (structs['payload'] || []),
+          results: (structs['result'] || []),
           model: m,
           payload: pt ? GoStruct.new(pt) : nil,
-          result: rt ? GoStruct.new(rt) : nil
+          result: rt ? GoStruct.new(rt) : nil,
         }
         new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.name.underscore, "conv.go"), variables)
       end
