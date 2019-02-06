@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"sort"
 )
 
 func process(objectMap map[string][]interface{}, ptn *regexp.Regexp) {
@@ -26,6 +27,10 @@ func process(objectMap map[string][]interface{}, ptn *regexp.Regexp) {
 				dataTypes = append(dataTypes, dt)
 			}
 		}
+
+		sort.Slice(dataTypes, func(i, j int) bool {
+			return (dataTypes[i].PkgPath +"."+ dataTypes[i].Name) < (dataTypes[j].PkgPath +"."+ dataTypes[j].Name)
+		})
 
 		res[key] = dataTypes
 	}
