@@ -13,7 +13,14 @@ import (
 	goon "github.com/akm/goa_model_gen/project1/stores/goon_store"
 )
 
+type MemoStoreBinder interface {
+	Query(q *datastore.Query) *datastore.Query
+	Visible(m *model.Memo) bool
+	Prepare(m *model.Memo)
+}
+
 type MemoStore struct {
+	Binder MemoStoreBinder
 }
 
 func (s *MemoStore) All(ctx context.Context) ([]*model.Memo, error) {
@@ -46,7 +53,11 @@ func (s *MemoStore) Query(ctx context.Context) *datastore.Query {
 	g := goon.FromContext(ctx)
 	k := g.Kind(new(model.Memo))
 	// log.Infof(ctx, "Kind for model.Memo is %v\n", k)
-	return datastore.NewQuery(k)
+	q := datastore.NewQuery(k)
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
 }
 
 func (s *MemoStore) ByID(ctx context.Context, id int64) (*model.Memo, error) {
@@ -64,12 +75,7 @@ func (s *MemoStore) ByKey(ctx context.Context, key *datastore.Key) (*model.Memo,
 		return nil, err
 	}
 
-	r := model.Memo{Id: key.IntID()}
-	err := s.Get(ctx, &r)
-	if err != nil {
-		return nil, err
-	}
-	return &r, nil
+	return s.ByID(ctx, key.IntID())
 }
 
 func (s *MemoStore) Get(ctx context.Context, m *model.Memo) error {
@@ -78,6 +84,10 @@ func (s *MemoStore) Get(ctx context.Context, m *model.Memo) error {
 	if err != nil {
 		log.Errorf(ctx, "Failed to Get model.Memo because of %v\n", err)
 		return err
+	}
+
+	if s.Binder != nil && !s.Binder.Visible(m) {
+		return datastore.ErrNoSuchEntity
 	}
 
 	return nil
@@ -151,6 +161,9 @@ func (s *MemoStore) Update(ctx context.Context, m *model.Memo) (*datastore.Key, 
 }
 
 func (s *MemoStore) PutWith(ctx context.Context, m *model.Memo, f func() error) (*datastore.Key, error) {
+	if s.Binder != nil {
+		s.Binder.Prepare(m)
+	}
 	if err := s.Validate(ctx, m); err != nil {
 		return nil, err
 	}
