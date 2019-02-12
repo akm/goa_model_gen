@@ -1,7 +1,6 @@
 <%- user_editable -%>
-<%- package source_file.basename -%>
+<%- package model_basename -%>
 
-<%- source_file.types.select(&:store?).each do |model| -%>
 <%-
       import "context"
       import "#{config.go_package}/model"
@@ -16,5 +15,3 @@ func (s *<%= store_name %>) Validate(ctx context.Context, m *model.<%= model.nam
 	}
 	return nil
 }
-
-<%- end -%>
