@@ -7,6 +7,8 @@ require "goa_model_gen/type"
 require "goa_model_gen/field"
 require "goa_model_gen/source_file"
 
+require "active_support/core_ext/string"
+
 module GoaModelGen
   class BaseLoader
     attr_reader :path, :raw
@@ -106,11 +108,11 @@ module GoaModelGen
     end
 
     def load_files(paths)
-      swagger_loader = GoaModelGen::SwaggerLoader.new(config.swagger_yaml)
+      swagger_loader = config.swagger_yaml.present? ? GoaModelGen::SwaggerLoader.new(config.swagger_yaml) : nil
       defined_types = {}
       files = paths.map do |path|
         GoaModelGen::ModelLoader.new(path).load_file.tap do |f|
-          f.types.each{|t| t.assign_swagger_types(swagger_loader) }
+          f.types.each{|t| t.assign_swagger_types(swagger_loader) } if swagger_loader
           f.types.each{|t| defined_types[t.name] = t }
         end
       end
