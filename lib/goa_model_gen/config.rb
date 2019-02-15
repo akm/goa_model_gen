@@ -25,7 +25,7 @@ module GoaModelGen
 
     def fulfill
       @go_package     ||= default_go_package
-      @swagger_yaml   ||= "./swagger/swagger.yaml"
+      # @swagger_yaml   ||= "./swagger/swagger.yaml"
       @gofmt_disabled ||= false
       @model_dir      ||= "./model"
       @store_dir      ||= "./stores"
