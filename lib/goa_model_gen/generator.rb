@@ -28,6 +28,7 @@ module GoaModelGen
 
     def package(name = nil)
       if name
+        raise "Invalid package name #{name.inspect}" if name.include?('_')
         @package = name
       else
         @package

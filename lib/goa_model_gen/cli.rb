@@ -21,12 +21,18 @@ module GoaModelGen
     class_option :force, type: :boolean, aliases: 'f', desc: 'Force overwrite files'
     class_option :keep_editable, type: :boolean, aliases: 'k', default: true, desc: 'Keep user editable file'
     class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
-    class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
+    class_option :config, type: :string, aliases: 'c', default: '.goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
-    desc "config", "Generate config file"
-    def config(path = './goa_model_gen.yaml')
+    desc "init", "Generate config file"
+    def init(path = '.goa_model_gen.yaml')
       setup
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
+    end
+
+    desc "config", "Show configuration"
+    def config(path = '.goa_model_gen.yaml')
+      setup
+      puts YAML.dump(cfg)
     end
 
     desc "show FILE1...", "Show model info from definition files"
@@ -61,15 +67,14 @@ module GoaModelGen
       })
       load_types_for(paths) do |source_file|
         source_file.types.select(&:store?).each do |model|
-          basename = model.name.underscore
           variables = {
             model: model,
-            model_basename: basename,
+            model_package: model.package,
           }
 
           new_generator.tap{|g| g.source_file = source_file }.process({
-            'templates/store.go.erb' => File.join(cfg.store_dir, basename, "store.go"),
-            'templates/store_validation.go.erb' => File.join(cfg.store_dir, basename, "validation.go"),
+            'templates/store.go.erb' => File.join(cfg.store_dir, model.package_path_name, "store.go"),
+            'templates/store_validation.go.erb' => File.join(cfg.store_dir, model.package_path_name, "validation.go"),
           }, variables)
         end
       end
@@ -79,7 +84,6 @@ module GoaModelGen
     def structs_gen
       setup
       new_generator.process({
-        "templates/structs_base.go.erb" => File.join(cfg.structs_gen_dir, "structs.go"),
         "templates/structs_main.go.erb" => File.join(cfg.structs_gen_dir, "main.go"),
       })
     end
@@ -103,7 +107,7 @@ module GoaModelGen
           payload: pt ? GoStruct.new(pt) : nil,
           result: rt ? GoStruct.new(rt) : nil,
         }
-        new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.name.underscore, "conv.go"), variables)
+        new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.package_path_name, "conv.go"), variables)
       end
     end
 

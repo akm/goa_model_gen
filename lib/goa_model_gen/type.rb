@@ -1,7 +1,11 @@
 require "goa_model_gen"
 
+require "goa_model_gen/go_package"
+
 module GoaModelGen
   class Type
+    include GoPackage
+
     attr_reader :name, :fields
 
     def initialize(name, attrs)

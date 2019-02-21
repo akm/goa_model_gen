@@ -7,16 +7,16 @@ def method_calling_exp(m, argument)
   end
 end
 
-gen_package = "#{config.go_package}/gen/#{model.name.underscore}"
+gen_package = "#{config.goa_gen_package_path}/#{model.package_path_name}"
 
 -%>
-<%- package model.name.underscore -%>
+<%- package model.package -%>
 
 <%- if payload-%>
 <%-
-    	import "#{config.go_package}/converters"
 			import :gen, gen_package
-			import "#{config.go_package}/model"
+			import config.converter_package_path
+			import config.model_package_path
 -%>
 func <%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>) (*model.<%= model.name %>, error) {
 	m := &model.<%= model.name %>{}
@@ -82,9 +82,9 @@ func CopyFrom<%= model.name %>PayloadToModel(payload *gen.<%= payload.name %>, m
 
 <%- if result -%>
 <%-
-    	import "#{config.go_package}/converters"
 			import :gen, gen_package
-			import "#{config.go_package}/model"
+			import config.converter_package_path
+			import config.model_package_path
 
       indirect_types =
         result.fields.map{|rf| rf.type.pkg_path == gen_package ? rf.type : nil }.

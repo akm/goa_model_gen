@@ -1,4 +1,4 @@
-<%- package model_basename -%>
+<%- package model_package -%>
 
 <%-	 store_name = "#{model.name}Store" -%>
 <%-
@@ -6,8 +6,8 @@
 			import "fmt"
 			import "google.golang.org/appengine/datastore"
 			import "google.golang.org/appengine/log"
-      import "#{config.go_package}/model"
-      import :goon, "#{config.go_package}/stores/goon_store"
+			import config.model_package_path
+			import :goon, "#{config.store_package_path}/goon_store"
 
       model_name = "model.#{model.name}"
 -%>

@@ -3,14 +3,21 @@ package 'main'
 
 user_editable
 
+import "os"
+import "reflect"
 import "regexp"
+
+import "github.com/akm/typedict"
+
+import config.model_package_path
 -%>
+
 
 // Usage
 // $ go run <%= config.structs_gen_dir %>/*.go
 
 func main() {
-	ptn := regexp.MustCompile(`\A<%= config.go_package  %>`)
+	ptn := regexp.MustCompile(`\A<%= config.model_package_path %>|\A<%= config.store_package_path %>|\A<%= config.converter_package_path %>`)
 
 	objectMap := map[string][]interface{}{
 		"model": []interface{}{
@@ -24,5 +31,10 @@ func main() {
 		},
 	}
 
-	process(objectMap, ptn)
+	structs := typedict.CategorizedTypes(objectMap,
+		typedict.KindFilter(append([]reflect.Kind{reflect.Struct}, typedict.SimpleKinds...)...),
+		func(t reflect.Type) bool {
+			return ptn.MatchString(t.PkgPath())
+		})
+	typedict.WriteJson(os.Stdout, structs)
 }
