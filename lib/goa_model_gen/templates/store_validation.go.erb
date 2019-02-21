@@ -3,7 +3,7 @@
 
 <%-
       import "context"
-      import "#{config.go_package}/model"
+			import config.model_package_path
 -%>
 <%-   store_name = "#{model.name}Store" -%>
 func (s *<%= store_name %>) Validate(ctx context.Context, m *model.<%= model.name %>) error {

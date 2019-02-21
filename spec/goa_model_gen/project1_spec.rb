@@ -11,12 +11,9 @@ RSpec.describe GoaModelGen::Type do
 
   let(:config) do
     GoaModelGen::Config.new.tap do |c|
-      c.go_package = "github.com/akm/goa_model_gen/project1"
+      c.base_package_path = "github.com/akm/goa_model_gen/project1"
       c.swagger_yaml   = File.expand_path("../project1/swagger/swagger.yaml", __FILE__)
       c.gofmt_disabled = false
-      c.model_dir = File.expand_path("../project1/model", __FILE__)
-      c.store_dir = File.expand_path("../project1/stores", __FILE__)
-      c.converter_dir = File.expand_path("../project1/converters", __FILE__)
       c.fulfill
     end
   end
