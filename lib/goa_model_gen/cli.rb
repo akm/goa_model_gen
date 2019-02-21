@@ -21,16 +21,16 @@ module GoaModelGen
     class_option :force, type: :boolean, aliases: 'f', desc: 'Force overwrite files'
     class_option :keep_editable, type: :boolean, aliases: 'k', default: true, desc: 'Keep user editable file'
     class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
-    class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
+    class_option :config, type: :string, aliases: 'c', default: '.goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
     desc "init", "Generate config file"
-    def init(path = './goa_model_gen.yaml')
+    def init(path = '.goa_model_gen.yaml')
       setup
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
     end
 
     desc "config", "Show configuration"
-    def config(path = './goa_model_gen.yaml')
+    def config(path = '.goa_model_gen.yaml')
       setup
       puts YAML.dump(cfg)
     end
