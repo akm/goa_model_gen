@@ -1,10 +1,14 @@
 # coding: utf-8
 require 'goa_model_gen'
 
+require "goa_model_gen/go_package"
+
 require "active_support/core_ext/string"
 
 module GoaModelGen
   class GoStruct
+    include GoPackage
+
     attr_reader :name, :pkg_path, :size, :fields
     def initialize(d)
       @name = d['Name']
