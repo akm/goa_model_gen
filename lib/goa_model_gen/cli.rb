@@ -23,10 +23,16 @@ module GoaModelGen
     class_option :log_level, type: :string, aliases: 'l', desc: 'Log level, one of  debug,info,warn,error,fatal. The default value is info'
     class_option :config, type: :string, aliases: 'c', default: './goa_model_gen.yaml', desc: 'Path to config file. You can generate it by config subcommand'
 
-    desc "config", "Generate config file"
-    def config(path = './goa_model_gen.yaml')
+    desc "init", "Generate config file"
+    def init(path = './goa_model_gen.yaml')
       setup
       open(path, 'w'){|f| f.puts(Config.new.fulfill.to_yaml) }
+    end
+
+    desc "config", "Show configuration"
+    def config(path = './goa_model_gen.yaml')
+      setup
+      puts YAML.dump(cfg)
     end
 
     desc "show FILE1...", "Show model info from definition files"
