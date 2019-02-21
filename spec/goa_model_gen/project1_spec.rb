@@ -80,7 +80,7 @@ RSpec.describe GoaModelGen::Type do
 
       variables = {
         model: user,
-        model_basename: 'user',
+        model_package: 'user',
       }
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/user.go')
       expect(generator.generate('templates/model_validation.go.erb')).to eq read_expected('project1/model/user_validation.go')
@@ -119,7 +119,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate_model do
       variables = {
         model: memo,
-        model_basename: 'memo',
+        model_package: 'memo',
       }
       generator.source_file = GoaModelGen::SourceFile.new('path/to/memo.yaml', [memo])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/memo.go')
@@ -176,7 +176,7 @@ RSpec.describe GoaModelGen::Type do
     it :generate do
       variables = {
         model: composite,
-        model_basename: 'composite',
+        model_package: 'composite',
       }
       generator.source_file = GoaModelGen::SourceFile.new('path/to/composite.yaml', [component1, composite])
       expect(generator.generate('templates/model.go.erb')).to eq read_expected('project1/model/composite.go')

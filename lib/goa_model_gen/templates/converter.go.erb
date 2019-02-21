@@ -7,10 +7,10 @@ def method_calling_exp(m, argument)
   end
 end
 
-gen_package = "#{config.go_package}/gen/#{model.name.underscore}"
+gen_package = "#{config.go_package}/gen/#{model.package_path_name}"
 
 -%>
-<%- package model.name.underscore -%>
+<%- package model.package -%>
 
 <%- if payload-%>
 <%-

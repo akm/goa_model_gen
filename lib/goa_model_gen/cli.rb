@@ -61,15 +61,14 @@ module GoaModelGen
       })
       load_types_for(paths) do |source_file|
         source_file.types.select(&:store?).each do |model|
-          basename = model.name.underscore
           variables = {
             model: model,
-            model_basename: basename,
+            model_package: model.package,
           }
 
           new_generator.tap{|g| g.source_file = source_file }.process({
-            'templates/store.go.erb' => File.join(cfg.store_dir, basename, "store.go"),
-            'templates/store_validation.go.erb' => File.join(cfg.store_dir, basename, "validation.go"),
+            'templates/store.go.erb' => File.join(cfg.store_dir, model.package_path_name, "store.go"),
+            'templates/store_validation.go.erb' => File.join(cfg.store_dir, model.package_path_name, "validation.go"),
           }, variables)
         end
       end
@@ -103,7 +102,7 @@ module GoaModelGen
           payload: pt ? GoStruct.new(pt) : nil,
           result: rt ? GoStruct.new(rt) : nil,
         }
-        new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.name.underscore, "conv.go"), variables)
+        new_generator.run('templates/converter.go.erb', File.join(cfg.converter_dir, m.package_path_name, "conv.go"), variables)
       end
     end
 
