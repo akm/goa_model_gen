@@ -78,7 +78,6 @@ module GoaModelGen
     def structs_gen
       setup
       new_generator.process({
-        "templates/structs_base.go.erb" => File.join(cfg.structs_gen_dir, "structs.go"),
         "templates/structs_main.go.erb" => File.join(cfg.structs_gen_dir, "main.go"),
       })
     end
