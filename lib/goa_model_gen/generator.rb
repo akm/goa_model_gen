@@ -63,6 +63,11 @@ module GoaModelGen
     GO_BASE_PATH = File.expand_path('../templates/base.go.erb', __FILE__)
 
     PACKAGE_FOR_IMPORT = {
+      # For appengine.GeoPoint
+      # https://godoc.org/google.golang.org/appengine
+      "appengine" => "google.golang.org/appengine",
+      # For *datastore.Key
+      # https://godoc.org/google.golang.org/appengine/datastore
       "datastore" => "google.golang.org/appengine/datastore",
     }
 
