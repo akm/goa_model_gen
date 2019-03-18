@@ -8,6 +8,7 @@
 			import "google.golang.org/appengine/log"
 			import config.model_package_path
 			import :goon, "#{config.store_package_path}/goon_store"
+      import :goonorig, "github.com/mjibson/goon"
 
       model_name = "model.#{model.name}"
 -%>
@@ -34,6 +35,11 @@ func (s *<%= store_name %>) Query() *datastore.Query {
 		q = s.Binder.Query(q)
 	}
 	return q
+}
+
+func (s *<%= store_name %>) Run(ctx context.Context, q *datastore.Query) *goonorig.Iterator {
+	g := goon.FromContext(ctx)
+	return g.Run(q)
 }
 
 func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
