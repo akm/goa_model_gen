@@ -8,6 +8,7 @@
 			import "google.golang.org/appengine/log"
 			import config.model_package_path
 			import :goon, "#{config.store_package_path}/goon_store"
+      import :goonorig, "github.com/mjibson/goon"
 
       model_name = "model.#{model.name}"
 -%>
@@ -24,20 +25,52 @@ type <%= store_name %> struct{
 <%- end -%>
 }
 
-func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
-	return s.Select(ctx, s.Query(ctx))
+func (s *<%= store_name %>) KindName() string {
+	return "<%= model.name%>"
 }
 
-func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
+func (s *<%= store_name %>) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
+}
+
+func (s *<%= store_name %>) Run(ctx context.Context, q *datastore.Query) *goonorig.Iterator {
+	g := goon.FromContext(ctx)
+	return g.Run(q)
+}
+
+func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
+	return s.AllBy(ctx, s.Query())
+}
+
+func (s *<%= store_name %>) AllBy(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
 	g := goon.FromContext(ctx)
 	r := []*<%= model_name %>{}
-	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select <%= model_name %> because of %v\n", err)
+		log.Errorf(ctx, "Failed to AllBy <%= model_name %> because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
+    return s.AllBy(ctx, q)
+}
+
+func (s *<%= store_name %>) FirstBy(ctx context.Context, q *datastore.Query) (*<%= model_name %>, error) {
+		r, err := s.AllBy(ctx, q.Limit(1))
+		if err != nil {
+				return nil, err
+		}
+		if len(r) > 0 {
+				return r[0], nil
+		} else {
+				return nil, nil
+		}
 }
 
 func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
@@ -48,17 +81,6 @@ func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (in
 		return 0, err
 	}
 	return c, nil
-}
-
-func (s *<%= store_name %>) Query(ctx context.Context) *datastore.Query {
-	g := goon.FromContext(ctx)
-	k := g.Kind(new(<%= model_name %>))
-	// log.Infof(ctx, "Kind for <%= model_name %> is %v\n", k)
-	q := datastore.NewQuery(k)
-	if s.Binder != nil {
-		q = s.Binder.Query(q)
-	}
-	return q
 }
 
 func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model_name %>, error) {
@@ -250,7 +272,7 @@ func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *<%= model
 <%- end -%>
 	}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query().Filter(field + " =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err

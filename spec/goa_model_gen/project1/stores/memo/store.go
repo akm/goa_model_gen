@@ -23,20 +23,47 @@ type MemoStore struct {
 	Binder MemoStoreBinder
 }
 
-func (s *MemoStore) All(ctx context.Context) ([]*model.Memo, error) {
-	return s.Select(ctx, s.Query(ctx))
+func (s *MemoStore) KindName() string {
+	return "Memo"
 }
 
-func (s *MemoStore) Select(ctx context.Context, q *datastore.Query) ([]*model.Memo, error) {
+func (s *MemoStore) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
+}
+
+func (s *MemoStore) All(ctx context.Context) ([]*model.Memo, error) {
+	return s.AllBy(ctx, s.Query())
+}
+
+func (s *MemoStore) AllBy(ctx context.Context, q *datastore.Query) ([]*model.Memo, error) {
 	g := goon.FromContext(ctx)
 	r := []*model.Memo{}
-	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select model.Memo because of %v\n", err)
+		log.Errorf(ctx, "Failed to AllBy model.Memo because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *MemoStore) Select(ctx context.Context, q *datastore.Query) ([]*model.Memo, error) {
+	return s.AllBy(ctx, q)
+}
+
+func (s *MemoStore) FirstBy(ctx context.Context, q *datastore.Query) (*model.Memo, error) {
+	r, err := s.AllBy(ctx, q.Limit(1))
+	if err != nil {
+		return nil, err
+	}
+	if len(r) > 0 {
+		return r[0], nil
+	} else {
+		return nil, nil
+	}
 }
 
 func (s *MemoStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
@@ -47,17 +74,6 @@ func (s *MemoStore) CountBy(ctx context.Context, q *datastore.Query) (int, error
 		return 0, err
 	}
 	return c, nil
-}
-
-func (s *MemoStore) Query(ctx context.Context) *datastore.Query {
-	g := goon.FromContext(ctx)
-	k := g.Kind(new(model.Memo))
-	// log.Infof(ctx, "Kind for model.Memo is %v\n", k)
-	q := datastore.NewQuery(k)
-	if s.Binder != nil {
-		q = s.Binder.Query(q)
-	}
-	return q
 }
 
 func (s *MemoStore) ByID(ctx context.Context, id int64) (*model.Memo, error) {
@@ -203,7 +219,7 @@ func (s *MemoStore) Delete(ctx context.Context, m *model.Memo) error {
 func (s *MemoStore) ValidateUniqueness(ctx context.Context, m *model.Memo) error {
 	conditions := map[string]interface{}{}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field+" =", value)
+		q := s.Query().Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err

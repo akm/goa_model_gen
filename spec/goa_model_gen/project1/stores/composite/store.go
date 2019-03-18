@@ -24,20 +24,47 @@ type CompositeStore struct {
 	Binder CompositeStoreBinder
 }
 
-func (s *CompositeStore) All(ctx context.Context) ([]*model.Composite, error) {
-	return s.Select(ctx, s.Query(ctx))
+func (s *CompositeStore) KindName() string {
+	return "Composite"
 }
 
-func (s *CompositeStore) Select(ctx context.Context, q *datastore.Query) ([]*model.Composite, error) {
+func (s *CompositeStore) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
+}
+
+func (s *CompositeStore) All(ctx context.Context) ([]*model.Composite, error) {
+	return s.AllBy(ctx, s.Query())
+}
+
+func (s *CompositeStore) AllBy(ctx context.Context, q *datastore.Query) ([]*model.Composite, error) {
 	g := goon.FromContext(ctx)
 	r := []*model.Composite{}
-	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select model.Composite because of %v\n", err)
+		log.Errorf(ctx, "Failed to AllBy model.Composite because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *CompositeStore) Select(ctx context.Context, q *datastore.Query) ([]*model.Composite, error) {
+	return s.AllBy(ctx, q)
+}
+
+func (s *CompositeStore) FirstBy(ctx context.Context, q *datastore.Query) (*model.Composite, error) {
+	r, err := s.AllBy(ctx, q.Limit(1))
+	if err != nil {
+		return nil, err
+	}
+	if len(r) > 0 {
+		return r[0], nil
+	} else {
+		return nil, nil
+	}
 }
 
 func (s *CompositeStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
@@ -48,17 +75,6 @@ func (s *CompositeStore) CountBy(ctx context.Context, q *datastore.Query) (int, 
 		return 0, err
 	}
 	return c, nil
-}
-
-func (s *CompositeStore) Query(ctx context.Context) *datastore.Query {
-	g := goon.FromContext(ctx)
-	k := g.Kind(new(model.Composite))
-	// log.Infof(ctx, "Kind for model.Composite is %v\n", k)
-	q := datastore.NewQuery(k)
-	if s.Binder != nil {
-		q = s.Binder.Query(q)
-	}
-	return q
 }
 
 func (s *CompositeStore) ByID(ctx context.Context, id string) (*model.Composite, error) {
@@ -207,7 +223,7 @@ func (s *CompositeStore) Delete(ctx context.Context, m *model.Composite) error {
 func (s *CompositeStore) ValidateUniqueness(ctx context.Context, m *model.Composite) error {
 	conditions := map[string]interface{}{}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field+" =", value)
+		q := s.Query().Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
