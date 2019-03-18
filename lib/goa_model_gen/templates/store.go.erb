@@ -24,8 +24,12 @@ type <%= store_name %> struct{
 <%- end -%>
 }
 
+func (s *<%= store_name %>) KindName() string {
+	return "<%= model.name%>"
+}
+
 func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
-	return s.Select(ctx, s.Query(ctx))
+	return s.Select(ctx, s.Query())
 }
 
 func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
@@ -50,11 +54,8 @@ func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (in
 	return c, nil
 }
 
-func (s *<%= store_name %>) Query(ctx context.Context) *datastore.Query {
-	g := goon.FromContext(ctx)
-	k := g.Kind(new(<%= model_name %>))
-	// log.Infof(ctx, "Kind for <%= model_name %> is %v\n", k)
-	q := datastore.NewQuery(k)
+func (s *<%= store_name %>) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
 	if s.Binder != nil {
 		q = s.Binder.Query(q)
 	}
@@ -250,7 +251,7 @@ func (s *<%= store_name %>) ValidateUniqueness(ctx context.Context, m *<%= model
 <%- end -%>
 	}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field + " =", value)
+		q := s.Query().Filter(field + " =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
