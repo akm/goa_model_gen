@@ -28,6 +28,14 @@ func (s *<%= store_name %>) KindName() string {
 	return "<%= model.name%>"
 }
 
+func (s *<%= store_name %>) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
+}
+
 func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
 	return s.Select(ctx, s.Query())
 }
@@ -52,14 +60,6 @@ func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (in
 		return 0, err
 	}
 	return c, nil
-}
-
-func (s *<%= store_name %>) Query() *datastore.Query {
-	q := datastore.NewQuery(s.KindName())
-	if s.Binder != nil {
-		q = s.Binder.Query(q)
-	}
-	return q
 }
 
 func (s *<%= store_name %>) ByID(ctx context.Context, <%= model.id_name_var %> <%= model.id_golang_type %>) (*<%= model_name %>, error) {
