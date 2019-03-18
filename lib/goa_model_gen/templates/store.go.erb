@@ -55,6 +55,18 @@ func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*
     return s.AllBy(ctx, q)
 }
 
+func (s *<%= store_name %>) FirstBy(ctx context.Context, q *datastore.Query) (*<%= model_name %>, error) {
+		r, err := s.AllBy(ctx, q.Limit(1))
+		if err != nil {
+				return nil, err
+		}
+		if len(r) > 0 {
+				return r[0], nil
+		} else {
+				return nil, nil
+		}
+}
+
 func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
 	g := goon.FromContext(ctx)
 	c, err := g.Count(q)
