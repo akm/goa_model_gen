@@ -23,20 +23,47 @@ type UserStore struct {
 	Binder UserStoreBinder
 }
 
-func (s *UserStore) All(ctx context.Context) ([]*model.User, error) {
-	return s.Select(ctx, s.Query(ctx))
+func (s *UserStore) KindName() string {
+	return "User"
 }
 
-func (s *UserStore) Select(ctx context.Context, q *datastore.Query) ([]*model.User, error) {
+func (s *UserStore) Query() *datastore.Query {
+	q := datastore.NewQuery(s.KindName())
+	if s.Binder != nil {
+		q = s.Binder.Query(q)
+	}
+	return q
+}
+
+func (s *UserStore) All(ctx context.Context) ([]*model.User, error) {
+	return s.AllBy(ctx, s.Query())
+}
+
+func (s *UserStore) AllBy(ctx context.Context, q *datastore.Query) ([]*model.User, error) {
 	g := goon.FromContext(ctx)
 	r := []*model.User{}
-	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select model.User because of %v\n", err)
+		log.Errorf(ctx, "Failed to AllBy model.User because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *UserStore) Select(ctx context.Context, q *datastore.Query) ([]*model.User, error) {
+	return s.AllBy(ctx, q)
+}
+
+func (s *UserStore) FirstBy(ctx context.Context, q *datastore.Query) (*model.User, error) {
+	r, err := s.AllBy(ctx, q.Limit(1))
+	if err != nil {
+		return nil, err
+	}
+	if len(r) > 0 {
+		return r[0], nil
+	} else {
+		return nil, nil
+	}
 }
 
 func (s *UserStore) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
@@ -47,17 +74,6 @@ func (s *UserStore) CountBy(ctx context.Context, q *datastore.Query) (int, error
 		return 0, err
 	}
 	return c, nil
-}
-
-func (s *UserStore) Query(ctx context.Context) *datastore.Query {
-	g := goon.FromContext(ctx)
-	k := g.Kind(new(model.User))
-	// log.Infof(ctx, "Kind for model.User is %v\n", k)
-	q := datastore.NewQuery(k)
-	if s.Binder != nil {
-		q = s.Binder.Query(q)
-	}
-	return q
 }
 
 func (s *UserStore) ByID(ctx context.Context, iD string) (*model.User, error) {
@@ -205,7 +221,7 @@ func (s *UserStore) ValidateUniqueness(ctx context.Context, m *model.User) error
 		"Email": m.Email,
 	}
 	for field, value := range conditions {
-		q := s.Query(ctx).Filter(field+" =", value)
+		q := s.Query().Filter(field+" =", value)
 		c, err := s.CountBy(ctx, q)
 		if err != nil {
 			return err
