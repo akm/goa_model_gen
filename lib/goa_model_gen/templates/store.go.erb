@@ -37,19 +37,22 @@ func (s *<%= store_name %>) Query() *datastore.Query {
 }
 
 func (s *<%= store_name %>) All(ctx context.Context) ([]*<%= model_name %>, error) {
-	return s.Select(ctx, s.Query())
+	return s.AllBy(ctx, s.Query())
 }
 
-func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
+func (s *<%= store_name %>) AllBy(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
 	g := goon.FromContext(ctx)
 	r := []*<%= model_name %>{}
-	log.Infof(ctx, "q is %v\n", q)
 	_, err := g.GetAll(q.EventualConsistency(), &r)
 	if err != nil {
-		log.Errorf(ctx, "Failed to Select <%= model_name %> because of %v\n", err)
+		log.Errorf(ctx, "Failed to AllBy <%= model_name %> because of %v\n", err)
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *<%= store_name %>) Select(ctx context.Context, q *datastore.Query) ([]*<%= model_name %>, error) {
+    return s.AllBy(ctx, q)
 }
 
 func (s *<%= store_name %>) CountBy(ctx context.Context, q *datastore.Query) (int, error) {
