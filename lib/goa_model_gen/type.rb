@@ -43,6 +43,7 @@ module GoaModelGen
     attr_reader :goon
     attr_reader :base
     attr_reader :conv
+    attr_reader :ref_name
 
     def initialize(name, attrs)
       super(name, attrs)
@@ -53,6 +54,7 @@ module GoaModelGen
       @payload_name = check_blank(attrs['payload']){ store? ? "#{@name}Payload" : @name }
       @media_type_name = check_blank(attrs['media_type']){ @name }
       @conv = attrs['conv'] || 'generate'
+      @ref_name = attrs['ref_name']
     end
 
     def check_blank(s)
