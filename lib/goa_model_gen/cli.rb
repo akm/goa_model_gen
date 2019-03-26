@@ -48,7 +48,7 @@ module GoaModelGen
     def model(*paths)
       setup
       new_generator.process({
-        'templates/validator.go.erb' => File.join(cfg.model_dir, 'validator.go'),
+        'templates/validator.go.erb' => File.join(cfg.validator_dir, 'validator.go'),
         'templates/model_base.go.erb' => File.join(cfg.model_dir, "model_base.go"),
       })
       load_types_for(paths) do |source_file|
