@@ -14,6 +14,7 @@ module GoaModelGen
     attr_accessor :swagger_name
     attr_reader :type_obj
     attr_reader :datastore_tag
+    attr_reader :prepare_method
 
     def initialize(name, attrs)
       @name = name
@@ -26,6 +27,7 @@ module GoaModelGen
       @goa_name = attrs['goa_name']
       @swagger_name = attrs['swagger_name']
       @datastore_tag = attrs['datastore_tag']
+      @prepare_method = attrs['prepare_method']
     end
 
     # https://goa.design/design/overview/

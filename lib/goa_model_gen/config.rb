@@ -15,6 +15,8 @@ module GoaModelGen
       base_package_path
       model_dir
       model_package_path
+      validator_dir
+      validator_package_path
       store_dir
       store_package_path
       converter_dir
@@ -32,11 +34,13 @@ module GoaModelGen
       # @swagger_yaml   ||= "./swagger/swagger.yaml"
       @gofmt_disabled ||= false
       @model_dir      ||= "./model"
+      @validator_dir  ||= "./model"
       @store_dir      ||= "./stores"
       @converter_dir  ||= "./converters"
       @goa_gen_dir    ||= "./gen"
       @base_package_path  ||= default_go_package
       @model_package_path ||= join_paths(@base_package_path, @model_dir)
+      @validator_package_path ||= join_paths(@base_package_path, @validator_dir)
       @store_package_path ||= join_paths(@base_package_path, @store_dir)
       @converter_package_path ||= join_paths(@base_package_path, @converter_dir)
       @goa_gen_package_path   ||= join_paths(@base_package_path, @goa_gen_dir)

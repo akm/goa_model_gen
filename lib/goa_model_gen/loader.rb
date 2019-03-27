@@ -1,5 +1,6 @@
 require "goa_model_gen"
 
+require "erb"
 require "yaml"
 
 require "goa_model_gen/logger"
@@ -17,7 +18,11 @@ module GoaModelGen
       @path = path
       @kind = kind
       @types_key, @fields_key = types_key, fields_key
-      @raw = YAML.load_file(path)
+
+      erb = ERB.new(File.read(path), nil, "-")
+      erb.filename = path
+      txt = erb.result
+      @raw = YAML.load(txt)
     end
 
     def build_type(name, d)

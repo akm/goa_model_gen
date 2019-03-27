@@ -75,7 +75,16 @@ func <%= type.name %>ToString(v <%= type.name %>) string {
 <%- end -%>
 
 <%- source_file.types.select(&:store?).each do |model| -%>
+func (m *<%= model.name %>) Assign(ref *Ref<%= model.id_golang_type.camelize %>) error {
+	ref.ID = m.ID
+<%-   if model.ref_name.present? -%>
+	ref.Name = m.<%= model.ref_name %>
+<%-   end -%>
+	return nil
+}
+
 func (m *<%= model.name %>) PrepareToCreate() error {
+  m.PrepareFields()
 <%- if model.fields.any?{|f| f.name == "CreatedAt"} -%>
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now()
@@ -92,6 +101,15 @@ func (m *<%= model.name %>) PrepareToCreate() error {
 func (m *<%= model.name %>) PrepareToUpdate() error {
 <%- if model.fields.any?{|f| f.name == "UpdatedAt"} -%>
 	m.UpdatedAt = time.Now()
+<%- end -%>
+	return nil
+}
+
+func (m *<%= model.name %>) PrepareFields() error {
+<%- model.fields.each do |field| -%>
+<%-   if field.prepare_method.present? -%>
+  m.<%= field.name %> = m.<%= field.name %>.<%= field.prepare_method %>()
+<%-   end -%>
 <%- end -%>
 	return nil
 }
