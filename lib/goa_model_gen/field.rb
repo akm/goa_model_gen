@@ -13,6 +13,7 @@ module GoaModelGen
     attr_accessor :validation
     attr_accessor :swagger_name
     attr_reader :type_obj
+    attr_reader :json_tag
     attr_reader :datastore_tag
     attr_reader :prepare_method
 
@@ -26,6 +27,7 @@ module GoaModelGen
       @validation = attrs['validation']
       @goa_name = attrs['goa_name']
       @swagger_name = attrs['swagger_name']
+      @json_tag = attrs['json_tag']
       @datastore_tag = attrs['datastore_tag']
       @prepare_method = attrs['prepare_method']
     end
@@ -79,16 +81,20 @@ module GoaModelGen
     end
 
     def tag
-      json_tag = name.underscore.dup
-      json_tag << ',omitempty' if nullable?
       validate_tags = nullable? ? [] : ['required']
       validate_tags << validation.presence
       validate_tags.compact!
       [
-        ['json', json_tag],
+        ['json', json_tag.presence || build_json_tag],
         ['validate', validate_tags.join(',').presence],
         ['datastore', datastore_tag],
       ].map{|k,v| v ? "#{k}:\"#{v}\"" : nil}.compact.join(' ')
+    end
+
+    def build_json_tag
+      r = name.underscore.dup
+      r << ',omitempty' if nullable?
+      return r
     end
 
     def definition
