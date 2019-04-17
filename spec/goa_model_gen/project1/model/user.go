@@ -57,7 +57,13 @@ type User struct {
 	UpdatedAt         time.Time `json:"updated_at" validate:"required"`
 }
 
+func (m *User) Assign(ref *RefString) error {
+	ref.ID = m.ID
+	return nil
+}
+
 func (m *User) PrepareToCreate() error {
+	m.PrepareFields()
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now()
 	}
@@ -68,7 +74,12 @@ func (m *User) PrepareToCreate() error {
 }
 
 func (m *User) PrepareToUpdate() error {
+	m.PrepareFields()
 	m.UpdatedAt = time.Now()
+	return nil
+}
+
+func (m *User) PrepareFields() error {
 	return nil
 }
 

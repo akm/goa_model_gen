@@ -12,11 +12,22 @@ type Composite struct {
 	Components    []Component1 `json:"components,omitempty"`
 }
 
+func (m *Composite) Assign(ref *RefString) error {
+	ref.ID = m.ID
+	return nil
+}
+
 func (m *Composite) PrepareToCreate() error {
+	m.PrepareFields()
 	return nil
 }
 
 func (m *Composite) PrepareToUpdate() error {
+	m.PrepareFields()
+	return nil
+}
+
+func (m *Composite) PrepareFields() error {
 	return nil
 }
 

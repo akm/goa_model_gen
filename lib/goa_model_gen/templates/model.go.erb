@@ -99,6 +99,7 @@ func (m *<%= model.name %>) PrepareToCreate() error {
 }
 
 func (m *<%= model.name %>) PrepareToUpdate() error {
+	m.PrepareFields()
 <%- if model.fields.any?{|f| f.name == "UpdatedAt"} -%>
 	m.UpdatedAt = time.Now()
 <%- end -%>
