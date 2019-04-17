@@ -11,6 +11,7 @@ import (
 
 	"github.com/akm/goa_model_gen/project1/model"
 	goon "github.com/akm/goa_model_gen/project1/stores/goon_store"
+	goonorig "github.com/mjibson/goon"
 )
 
 type MemoStoreBinder interface {
@@ -33,6 +34,11 @@ func (s *MemoStore) Query() *datastore.Query {
 		q = s.Binder.Query(q)
 	}
 	return q
+}
+
+func (s *MemoStore) Run(ctx context.Context, q *datastore.Query) *goonorig.Iterator {
+	g := goon.FromContext(ctx)
+	return g.Run(q)
 }
 
 func (s *MemoStore) All(ctx context.Context) ([]*model.Memo, error) {

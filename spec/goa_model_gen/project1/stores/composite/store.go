@@ -12,6 +12,7 @@ import (
 	"github.com/akm/goa_model_gen/project1/model"
 	goon "github.com/akm/goa_model_gen/project1/stores/goon_store"
 	"github.com/goadesign/goa/uuid"
+	goonorig "github.com/mjibson/goon"
 )
 
 type CompositeStoreBinder interface {
@@ -34,6 +35,11 @@ func (s *CompositeStore) Query() *datastore.Query {
 		q = s.Binder.Query(q)
 	}
 	return q
+}
+
+func (s *CompositeStore) Run(ctx context.Context, q *datastore.Query) *goonorig.Iterator {
+	g := goon.FromContext(ctx)
+	return g.Run(q)
 }
 
 func (s *CompositeStore) All(ctx context.Context) ([]*model.Composite, error) {

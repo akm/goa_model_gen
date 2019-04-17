@@ -17,7 +17,13 @@ type Memo struct {
 	UpdatedAt   time.Time      `json:"updated_at" validate:"required"`
 }
 
+func (m *Memo) Assign(ref *RefInt64) error {
+	ref.ID = m.ID
+	return nil
+}
+
 func (m *Memo) PrepareToCreate() error {
+	m.PrepareFields()
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now()
 	}
@@ -28,7 +34,12 @@ func (m *Memo) PrepareToCreate() error {
 }
 
 func (m *Memo) PrepareToUpdate() error {
+	m.PrepareFields()
 	m.UpdatedAt = time.Now()
+	return nil
+}
+
+func (m *Memo) PrepareFields() error {
 	return nil
 }
 
